@@ -1,12 +1,14 @@
 # GroundedAI Tools
 
-Three interactive machine-learning tools built from my **GroundedAI** notebook, a source-grounded study assistant over 8 ML references. Each tool is a single HTML file, made with an AI agent without writing code by hand.
+Four interactive study tools built from my source-grounded notebooks: three for **machine learning** (from my GroundedAI notebook) and one for **data structures and algorithms** (from my DSA notebook). Each tool is a single HTML file, made with an AI agent without writing code by hand.
+
+**BSERC GenAI Internship · Week 1 · Project 2 ("Thinking in HTML")**
 
 **▶ Live demo:** https://pranavthatenough.github.io/groundedai-tools/
 
-**📓 Source notebook (Project 1):** [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669). Everything in these tools is grounded in this notebook and its sources.
+**📓 Source notebooks:** ML: [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669). Everything in tools 1–3 is grounded in this notebook. DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53), the source for tool 4.
 
-![Home page with the three tools](screenshots/home.png)
+![Home page with the four tools](screenshots/home.png)
 
 ## The tools
 
@@ -44,16 +46,27 @@ Shows *why* source-grounded AI is more trustworthy than a chatbot answering from
 
 ![Grounded answer lab](screenshots/grounded-lab.png)
 
+### 4. DSA Study Hub (for college and placements)
+A complete DSA revision and practice tool for college exams and coding interviews, grounded in my [DSA notebook](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53).
+
+- **Learn:** a 26-topic syllabus checklist (arrays to dynamic programming and interview patterns), each tagged with its source, plus a **Big-O cheat sheet** for data structures and sorting algorithms
+- **Visualiser:** watch bubble, selection, insertion, merge and quick sort, plus binary and linear search, step by step. It counts comparisons and swaps, and you can try sorted or reversed input to see best and worst cases.
+- **Practice:** a **"Which pattern?" quiz** (two pointers, sliding window, BFS, DP…) and a **tracker** for 30 classic interview problems (Todo → Solved → Revise)
+- **Revise:** 18 flip-cards on complexities, trade-offs and interview tips
+- Progress is saved in the browser; dark mode
+
+![DSA study hub](screenshots/dsa-hub.png)
+
 ## Run it
 
 - **Online:** open the live demo link above.
-- **Offline:** download the repo (*Code → Download ZIP*), unzip, and double-click `index.html` or any of the three tool files. No install and no internet needed.
+- **Offline:** download the repo (*Code → Download ZIP*), unzip, and double-click `index.html` or any of the four tool files. No install and no internet needed.
 
 Works on a laptop or a phone.
 
 ## Notebook sources
 
-All three tools are built on my Project 1 notebook, **[GroundedAI](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669)**. It answers only from the references below and cites every claim.
+**ML: [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669)** (tools 1–3). It answers only from these references and cites every claim.
 
 1. Dive into Deep Learning (D2L)
 2. Google Machine Learning Crash Course
@@ -63,6 +76,15 @@ All three tools are built on my Project 1 notebook, **[GroundedAI](https://noteb
 6. My own GroundedAI notes
 
 The Answer Lab's passages are my own short summaries of these sources, not copied text.
+
+**DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53)** (tool 4)
+
+1. [Open Data Structures](https://opendatastructures.org/), Pat Morin (free textbook)
+2. [MIT 6.006 Introduction to Algorithms](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/), lecture notes
+3. [Algorithms](https://jeffe.cs.illinois.edu/teaching/algorithms/), Jeff Erickson: dynamic programming and greedy chapters
+4. [Tech Interview Handbook](https://www.techinterviewhandbook.org/algorithms/introduction/): topic cheat sheets
+5. [Big-O Cheat Sheet](https://www.interviewcake.com/big-o-cheatsheet), Interview Cake
+6. My own DSA notes
 
 ## How it was built
 
@@ -75,10 +97,11 @@ The full prompts and every fix round are in [`prompts.md`](prompts.md).
 ## Files
 
 ```
-index.html                          home page with a Live demo button for each tool
+index.html                          home page: a Live demo button for each tool and both notebooks
 1-ml-revision-dashboard.html        tool 1
 2-classification-playground.html    tool 2
 3-grounded-answer-lab.html          tool 3
+4-dsa-study-hub.html                tool 4
 prompts.md                          every prompt, in order, plus fix rounds
 screenshots/                        images used in this README
 ```

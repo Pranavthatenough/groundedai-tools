@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSA Study Hub · GroundedAI</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#ffffff; --surface-2:#f0ede6; --ink:#1b1b1f; --muted:#62626b;
+  --line:#e2ded5; --accent:#3b4cca; --accent-soft:#e6e8fb; --good:#1f8a57; --good-soft:#dff3e8;
+  --bad:#c0392b; --bad-soft:#fbe4e1; --warn:#b26a00; --warn-soft:#fff1d6; --radius:14px;
+  --bar:#b9c0ee; --cmp:#f0a23b; --swp:#d9534f; --done:#3fae78; --found:#1f8a57;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05);
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab;
+  --line:#2e313a; --accent:#8b97ff; --accent-soft:#272b4a; --good:#4cc38a; --good-soft:#1b3328;
+  --bad:#ff7a6b; --bad-soft:#3a2120; --warn:#f0b24a; --warn-soft:#3a2f17; --shadow:none;
+  --bar:#454c80; --cmp:#e8a03a; --swp:#e5675c; --done:#3fae78; --found:#4cc38a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand small{display:block;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.brand h1{margin:2px 0 0;font-size:clamp(22px,4vw,30px);letter-spacing:-.02em}
+.brand h1 span{color:var(--accent)}
+.head-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;transition:.15s}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:5px 11px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.span-12{grid-column:span 12}.span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-6{grid-column:span 6}
+@media(max-width:900px){.span-7,.span-5,.span-6{grid-column:span 12}}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+
+/* tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px;font-size:14px;font-weight:550}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel[hidden]{display:none}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.toolbar input[type=search],select{padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.toolbar input[type=search]{flex:1;min-width:160px}
+
+/* topics */
+.ring-row{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.ring{width:84px;height:84px;flex:none}
+.ring circle{fill:none;stroke-width:9}
+.ring .track{stroke:var(--surface-2)}
+.ring .val{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .4s}
+.ring text{fill:var(--ink);font-size:20px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.group{border:1px solid var(--line);border-radius:12px;padding:12px}
+.group h3{margin:0 0 6px;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.group h3 em{font-style:normal;color:var(--muted);font-weight:500;font-size:12px}
+.bar{height:5px;background:var(--surface-2);border-radius:5px;overflow:hidden;margin-bottom:8px}
+.bar i{display:block;height:100%;background:var(--good);width:0;transition:width .3s}
+.topic{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-radius:8px;cursor:pointer}
+.topic:hover{background:var(--surface-2)}
+.topic input{margin-top:3px;accent-color:var(--good);width:16px;height:16px;flex:none}
+.topic.done span{color:var(--muted);text-decoration:line-through}
+.cite{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:0 5px;margin-left:3px;cursor:pointer;text-decoration:none!important;vertical-align:1px}
+
+/* big-o */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+.o{display:inline-block;font:12.5px var(--mono);padding:2px 7px;border-radius:6px}
+.o.g{background:var(--good-soft);color:var(--good)}
+.o.m{background:var(--warn-soft);color:var(--warn)}
+.o.b{background:var(--bad-soft);color:var(--bad)}
+.o.n{background:var(--surface-2);color:var(--muted)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:10px;align-items:center}
+
+/* visualiser */
+.viz-ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.ctl label b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ctl select,.ctl input[type=number]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.stage{position:relative;height:260px;background:var(--surface-2);border-radius:12px;padding:14px 12px 30px;display:flex;align-items:flex-end;gap:3px;overflow:hidden}
+.vb{flex:1;min-width:0;background:var(--bar);border-radius:4px 4px 0 0;position:relative;transition:height .12s,background .12s}
+.vb span{position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);font:11px var(--mono);color:var(--muted)}
+.vb.cmp{background:var(--cmp)}.vb.swp{background:var(--swp)}.vb.ok{background:var(--done)}.vb.out{opacity:.25}.vb.hit{background:var(--found)}
+.vb.mid{background:var(--accent)}
+.vstatus{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:12px;font-size:13.5px}
+.vstatus .msg{flex:1;min-width:220px;color:var(--ink)}
+.counter{font:13px var(--mono);color:var(--muted)}
+.counter b{color:var(--ink)}
+.vbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.vinfo{margin-top:12px;font-size:13.5px;padding:11px 13px;border-radius:10px;background:var(--accent-soft)}
+
+/* quiz */
+.qhead{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:6px}
+.qbar{height:6px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin-bottom:14px}
+.qbar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.qtext{font-size:17px;font-weight:650;margin:0 0 12px}
+.opts{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+@media(max-width:520px){.opts{grid-template-columns:1fr}}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:11px 13px;display:flex;gap:10px;align-items:flex-start}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt b{flex:none;width:22px;height:22px;border-radius:6px;background:var(--surface-2);display:grid;place-items:center;font-size:12px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.explain{margin-top:12px;padding:12px;border-radius:10px;background:var(--surface-2);font-size:14px;display:none}
+.explain.show{display:block}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:8px;flex-wrap:wrap}
+.result{text-align:center;padding:10px 0}
+.result b{font-size:44px;display:block;letter-spacing:-.03em}
+.review{text-align:left;margin-top:12px;font-size:13.5px}
+.review li{margin-bottom:6px}
+
+/* tracker */
+.trow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.tname{min-width:0}
+.tname a{color:var(--ink);font-weight:600;text-decoration:none}
+.tname a:hover{color:var(--accent);text-decoration:underline}
+.tname small{display:block;color:var(--muted);font-size:12px}
+.diff{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px}
+.diff.E{background:var(--good-soft);color:var(--good)}.diff.M{background:var(--warn-soft);color:var(--warn)}
+.status{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:12.5px;min-width:86px;font-weight:600}
+.status.todo{color:var(--muted)}.status.solved{background:var(--good-soft);border-color:var(--good);color:var(--good)}.status.revise{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.tprog{display:flex;gap:14px;align-items:center;margin-bottom:12px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.tprog .bar{flex:1;min-width:140px;height:8px;margin:0}
+
+/* flip cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.flip{perspective:900px;height:180px;border:0;padding:0;background:none;text-align:left}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;padding:14px;border:1px solid var(--line);display:flex;flex-direction:column;overflow:auto}
+.front{background:var(--surface-2)}
+.front .tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.front .q{font-weight:650;font-size:16px;margin:auto 0}
+.front .hint{font-size:12px;color:var(--muted)}
+.back{background:var(--surface);transform:rotateY(180deg);font-size:13.5px}
+.back code{font:12.5px var(--mono);background:var(--surface-2);padding:1px 4px;border-radius:4px}
+
+/* sources */
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;font-size:13px}
+.src{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:8px;transition:background .3s}
+.src.flash{background:var(--accent-soft)}
+.src .n{flex:none;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:0 6px}
+.src small{display:block;color:var(--muted)}
+.src a{color:var(--ink)}
+footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+footer a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin:14px 0 0 max(16px,env(safe-area-inset-left,0px));padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font:13px system-ui,sans-serif">← All projects</a>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <small>GroundedAI · DSA for College &amp; Placements</small>
+      <h1>DSA <span>Study Hub</span></h1>
+    </div>
+    <div class="head-actions">
+      <button class="btn" id="themeBtn" aria-label="Toggle dark mode">◐ Theme</button>
+      <button class="btn" id="resetAll">↺ Reset progress</button>
+    </div>
+  </header>
+
+  <section class="stats" aria-label="Summary">
+    <div class="stat"><b id="sTopics">0/0</b><span>topics covered</span></div>
+    <div class="stat"><b id="sSolved">0/0</b><span>practice problems solved</span></div>
+    <div class="stat"><b id="sRevise">0</b><span>problems to revise</span></div>
+    <div class="stat"><b id="sBest">–</b><span>best pattern-quiz score</span></div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" data-tab="learn" aria-selected="true">Learn</button>
+    <button class="tab" role="tab" data-tab="visual" aria-selected="false">Visualiser</button>
+    <button class="tab" role="tab" data-tab="practice" aria-selected="false">Practice</button>
+    <button class="tab" role="tab" data-tab="revise" aria-selected="false">Revise</button>
+  </nav>
+
+  <!-- LEARN -->
+  <div class="panel grid" data-panel="learn">
+    <section class="card span-12">
+      <div class="ring-row">
+        <svg class="ring" viewBox="0 0 84 84" aria-hidden="true">
+          <circle class="track" cx="42" cy="42" r="36"/>
+          <circle class="val" id="ringVal" cx="42" cy="42" r="36" stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+          <text x="42" y="42" id="ringTxt">0%</text>
+        </svg>
+        <div>
+          <h2>Syllabus checklist</h2>
+          <p class="sub" style="margin:0">Everything a college DSA course and a placement interview expects. Tags like <span class="cite" data-src="2">[2]</span> show which notebook source covers it; tap one to see the source.</p>
+        </div>
+      </div>
+      <div class="groups" id="groups"></div>
+    </section>
+
+    <section class="card span-12">
+      <h2>Big-O cheat sheet</h2>
+      <p class="sub">The complexities interviewers expect you to know by heart. <span class="cite" data-src="5">[5]</span> <span class="cite" data-src="2">[2]</span></p>
+      <div class="chips" id="boChips" role="group" aria-label="Table">
+        <button class="chip" data-bo="ds" aria-pressed="true">Data structures</button>
+        <button class="chip" data-bo="sort" aria-pressed="false">Sorting algorithms</button>
+      </div>
+      <div class="tablewrap"><table id="boTable"></table></div>
+      <div class="legend">
+        <span><span class="o g">fast</span> O(1), O(log n)</span>
+        <span><span class="o m">okay</span> O(n), O(n log n)</span>
+        <span><span class="o b">slow</span> O(n²) and worse</span>
+        <span>Average case unless marked worst.</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- VISUALISER -->
+  <div class="panel grid" data-panel="visual" hidden>
+    <section class="card span-12">
+      <h2>Algorithm visualiser</h2>
+      <p class="sub">Step through how each algorithm really works and count the work it does. <span class="cite" data-src="2">[2]</span> <span class="cite" data-src="1">[1]</span></p>
+      <div class="viz-ctl">
+        <div class="ctl"><label for="vAlgo">Algorithm</label>
+          <select id="vAlgo">
+            <option value="bubble">Bubble sort</option>
+            <option value="selection">Selection sort</option>
+            <option value="insertion">Insertion sort</option>
+            <option value="merge">Merge sort</option>
+            <option value="quick">Quick sort</option>
+            <option value="binary">Binary search</option>
+            <option value="linear">Linear search</option>
+          </select></div>
+        <div class="ctl"><label for="vSize">Array size <b id="vSizeV">12</b></label><input type="range" id="vSize" min="5" max="32" value="12"></div>
+        <div class="ctl"><label for="vSpeed">Speed <b id="vSpeedV">Normal</b></label><input type="range" id="vSpeed" min="1" max="5" value="3"></div>
+        <div class="ctl" id="vTargetBox" hidden><label for="vTarget">Number to find</label><input type="number" id="vTarget" min="1" max="99"></div>
+      </div>
+      <div class="stage" id="stage" aria-label="Array as bars"></div>
+      <div class="vstatus">
+        <span class="msg" id="vMsg">Press Play to start.</span>
+        <span class="counter">steps <b id="vStep">0</b>/<b id="vTotal">0</b></span>
+        <span class="counter">comparisons <b id="vCmp">0</b></span>
+        <span class="counter" id="vSwpBox">swaps / writes <b id="vSwp">0</b></span>
+      </div>
+      <div class="vbtns">
+        <button class="btn primary" id="vPlay">▶ Play</button>
+        <button class="btn" id="vBack">◀ Step</button>
+        <button class="btn" id="vNext">Step ▶</button>
+        <button class="btn" id="vShuffle">⤮ New array</button>
+        <button class="btn" id="vSorted" title="Start from an already sorted array">Sorted input</button>
+        <button class="btn" id="vReverse" title="Start from a reversed array (worst case for many sorts)">Reversed input</button>
+      </div>
+      <div class="vinfo" id="vInfo"></div>
+      <div class="legend">
+        <span><i class="o" style="background:var(--cmp);color:#fff">■</i> comparing</span>
+        <span><i class="o" style="background:var(--swp);color:#fff">■</i> swapping / writing</span>
+        <span><i class="o" style="background:var(--done);color:#fff">■</i> in final place / found</span>
+        <span><i class="o" style="background:var(--accent);color:#fff">■</i> middle (binary search)</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="panel grid" data-panel="practice" hidden>
+    <section class="card span-6">
+      <h2>Which pattern?</h2>
+      <p class="sub">Interviews test whether you can spot the pattern from the problem statement. 10 questions, shuffled each time. <span class="cite" data-src="4">[4]</span> <span class="cite" data-src="6">[6]</span></p>
+      <div id="quiz"></div>
+    </section>
+    <section class="card span-6">
+      <h2>Problem tracker</h2>
+      <p class="sub">Classic interview problems by topic. Tap the status to cycle Todo → Solved → Revise. Saved in this browser.</p>
+      <div class="tprog"><span id="tCount">0 solved</span><div class="bar"><i id="tBar"></i></div></div>
+      <div class="toolbar">
+        <select id="tTopic" aria-label="Filter by topic"></select>
+        <select id="tStatus" aria-label="Filter by status">
+          <option value="all">All</option><option value="todo">Todo</option><option value="solved">Solved</option><option value="revise">Revise</option>
+        </select>
+      </div>
+      <div id="tracker"></div>
+    </section>
+  </div>
+
+  <!-- REVISE -->
+  <div class="panel grid" data-panel="revise" hidden>
+    <section class="card span-12">
+      <h2>Flash-cards</h2>
+      <p class="sub">Tap a card to flip it. Good for the night before a test or an interview.</p>
+      <div class="chips" id="cardChips" role="group" aria-label="Filter cards"></div>
+      <div class="toolbar">
+        <input type="search" id="cardSearch" placeholder="Search cards… e.g. heap, BFS, stable">
+        <button class="btn" id="shuffleBtn">⤮ Shuffle</button>
+        <button class="btn" id="flipAll">Flip all</button>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Notebook sources</h2>
+    <p class="sub">This hub is grounded in my <a href="https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53" target="_blank" rel="noopener" style="color:var(--accent)">DSA for College &amp; Placements</a> notebook.</p>
+    <div class="sources" id="sources"></div>
+  </section>
+  <footer>Built for the BSERC GenAI Internship. Progress is saved in this browser only. <a href="index.html">All tools</a></footer>
+</div>
+
+<script>
+const SOURCES=[
+  {n:1,t:"Open Data Structures",d:"Pat Morin · free textbook: arrays, lists, hashing, trees, heaps, sorting, graphs",u:"https://opendatastructures.org/"},
+  {n:2,t:"MIT 6.006 Introduction to Algorithms",d:"Lecture notes: data structures, sorting, hashing, heaps, BFS, Dijkstra",u:"https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/"},
+  {n:3,t:"Algorithms, Jeff Erickson",d:"Chapters on dynamic programming and greedy algorithms",u:"https://jeffe.cs.illinois.edu/teaching/algorithms/"},
+  {n:4,t:"Tech Interview Handbook",d:"Topic cheat sheets for coding interviews",u:"https://www.techinterviewhandbook.org/algorithms/introduction/"},
+  {n:5,t:"Big-O Cheat Sheet, Interview Cake",d:"Time and space complexity reference",u:"https://www.interviewcake.com/big-o-cheatsheet"},
+  {n:6,t:"My DSA notes",d:"My own notes on patterns and interview tips"}
+];
+
+const TOPICS=[
+  {g:"Foundations",items:[["Big-O: time and space complexity",5],["Arrays and dynamic arrays",1],["Strings",4],["Hashing: hash maps and sets",2]]},
+  {g:"Linear structures",items:[["Linked lists (singly, doubly)",1],["Stacks",1],["Queues and deques",1]]},
+  {g:"Searching & sorting",items:[["Linear and binary search",4],["O(n²) sorts: bubble, selection, insertion",2],["Merge sort and quick sort",2]]},
+  {g:"Trees & heaps",items:[["Binary trees and traversals",1],["Binary search trees",2],["Heaps and priority queues",2],["Tries",4]]},
+  {g:"Graphs",items:[["Graph representation: list vs matrix",1],["Breadth-first search (BFS)",2],["Depth-first search (DFS)",4],["Shortest paths: Dijkstra",2]]},
+  {g:"Problem-solving techniques",items:[["Recursion",6],["Greedy algorithms",3],["Backtracking",6],["Dynamic programming",3]]},
+  {g:"Interview patterns",items:[["Two pointers",6],["Sliding window",6],["Fast and slow pointers",6],["Intervals: sort and merge",4]]}
+];
+
+/* Big-O: [label, class] — g fast, m okay, b slow, n not applicable */
+const DS_COLS=["Structure","Access","Search","Insert","Delete","Note"];
+const DS=[
+  ["Array",["O(1)","g"],["O(n)","m"],["O(n)","m"],["O(n)","m"],"Append to a dynamic array is O(1) amortised"],
+  ["Linked list",["O(n)","m"],["O(n)","m"],["O(1)","g"],["O(1)","g"],"Insert/delete O(1) at the head or a known node"],
+  ["Stack",["O(n)","m"],["O(n)","m"],["O(1)","g"],["O(1)","g"],"Push / pop at the top"],
+  ["Queue",["O(n)","m"],["O(n)","m"],["O(1)","g"],["O(1)","g"],"Enqueue at back, dequeue at front"],
+  ["Hash table",["–","n"],["O(1)","g"],["O(1)","g"],["O(1)","g"],"Worst case O(n) when many keys collide"],
+  ["BST (balanced)",["O(log n)","g"],["O(log n)","g"],["O(log n)","g"],["O(log n)","g"],"Unbalanced BST: O(n) worst"],
+  ["Binary heap",["O(1) min/max","g"],["O(n)","m"],["O(log n)","g"],["O(log n)","g"],"Build a heap from n items in O(n)"],
+];
+const SORT_COLS=["Algorithm","Best","Average","Worst","Space","Stable?"];
+const SORTS=[
+  ["Bubble sort",["O(n)","m"],["O(n²)","b"],["O(n²)","b"],["O(1)","g"],"Yes"],
+  ["Selection sort",["O(n²)","b"],["O(n²)","b"],["O(n²)","b"],["O(1)","g"],"No"],
+  ["Insertion sort",["O(n)","m"],["O(n²)","b"],["O(n²)","b"],["O(1)","g"],"Yes"],
+  ["Merge sort",["O(n log n)","m"],["O(n log n)","m"],["O(n log n)","m"],["O(n)","m"],"Yes"],
+  ["Quick sort",["O(n log n)","m"],["O(n log n)","m"],["O(n²)","b"],["O(log n)","g"],"No"],
+  ["Heap sort",["O(n log n)","m"],["O(n log n)","m"],["O(n log n)","m"],["O(1)","g"],"No"],
+  ["Counting sort",["O(n + k)","m"],["O(n + k)","m"],["O(n + k)","m"],["O(k)","m"],"Yes"],
+];
+
+const PATTERNS=["Two pointers","Sliding window","Hashing","Stack","BFS","DFS","Binary search","Heap","Dynamic programming","Greedy","Backtracking","Fast and slow pointers"];
+const QUIZ=[
+  {q:"Find two numbers in a sorted array that add up to a target.",a:"Two pointers",e:"Start one pointer at each end and move them inwards based on the sum. O(n) time, O(1) space.",s:6},
+  {q:"Longest substring without repeating characters.",a:"Sliding window",e:"Grow the window to the right and shrink it from the left when a character repeats. O(n).",s:6},
+  {q:"Check whether two strings are anagrams.",a:"Hashing",e:"Count each character in a hash map (or a 26-slot array) and compare the counts. O(n).",s:4},
+  {q:"Check whether a string of brackets like \"{[()]}\" is balanced.",a:"Stack",e:"Push each opening bracket; on a closing bracket, pop and check it matches. O(n).",s:1},
+  {q:"Shortest number of moves to escape a maze grid (every move costs the same).",a:"BFS",e:"BFS explores level by level, so the first time it reaches the exit is the shortest path in an unweighted graph.",s:2},
+  {q:"Count the islands (connected groups of land cells) in a grid.",a:"DFS",e:"Start a DFS from each unvisited land cell and mark everything it reaches; each start is one island. BFS also works.",s:4},
+  {q:"Find a number in a sorted array that has been rotated, in O(log n).",a:"Binary search",e:"One half of the array is always sorted; check which half and discard the other each step.",s:4},
+  {q:"Keep track of the k largest numbers from a long stream.",a:"Heap",e:"Keep a min-heap of size k; if a new number beats the smallest, swap it in. O(n log k).",s:2},
+  {q:"Number of ways to climb n stairs taking 1 or 2 steps at a time.",a:"Dynamic programming",e:"ways(n) = ways(n−1) + ways(n−2). Store answers instead of recomputing them. O(n).",s:3},
+  {q:"Pick the maximum number of meetings that don't overlap.",a:"Greedy",e:"Sort meetings by end time and always take the one that finishes first. This greedy choice is provably safe.",s:3},
+  {q:"Generate every subset of a set of numbers.",a:"Backtracking",e:"For each element choose include or skip, recurse, then undo the choice. 2ⁿ subsets.",s:6},
+  {q:"Detect whether a linked list has a cycle, using O(1) extra space.",a:"Fast and slow pointers",e:"Move one pointer 1 step and the other 2 steps; if there is a cycle they will meet (Floyd's algorithm).",s:6},
+  {q:"Find the maximum sum of any k consecutive elements.",a:"Sliding window",e:"Keep a fixed-size window: add the new element, subtract the one that falls out. O(n).",s:6},
+  {q:"Find the first non-repeating character in a string.",a:"Hashing",e:"First pass: count characters in a hash map. Second pass: return the first with count 1. O(n).",s:4},
+  {q:"Find the smallest eating speed that lets you finish all bananas within h hours.",a:"Binary search",e:"Binary search on the answer: test a speed, and move left if it works or right if it doesn't.",s:4},
+  {q:"Longest common subsequence of two strings.",a:"Dynamic programming",e:"A 2D table where cell (i, j) holds the LCS of the first i and j characters. O(n·m).",s:3},
+];
+
+const PROBLEMS=[
+  ["Two Sum","Hashing","E"],["Contains Duplicate","Hashing","E"],["Valid Anagram","Hashing","E"],["Group Anagrams","Hashing","M"],
+  ["Best Time to Buy and Sell Stock","Arrays","E"],["Product of Array Except Self","Arrays","M"],["Maximum Subarray","Arrays","M"],["Merge Intervals","Arrays","M"],
+  ["Valid Palindrome","Two pointers","E"],["3Sum","Two pointers","M"],["Container With Most Water","Two pointers","M"],
+  ["Longest Substring Without Repeating Characters","Sliding window","M"],
+  ["Valid Parentheses","Stack","E"],["Min Stack","Stack","M"],
+  ["Reverse Linked List","Linked list","E"],["Merge Two Sorted Lists","Linked list","E"],["Linked List Cycle","Linked list","E"],
+  ["Binary Search","Binary search","E"],["Search in Rotated Sorted Array","Binary search","M"],
+  ["Maximum Depth of Binary Tree","Trees","E"],["Invert Binary Tree","Trees","E"],["Binary Tree Level Order Traversal","Trees","M"],["Validate Binary Search Tree","Trees","M"],
+  ["Kth Largest Element in an Array","Heap","M"],
+  ["Number of Islands","Graphs","M"],["Course Schedule","Graphs","M"],
+  ["Climbing Stairs","Dynamic programming","E"],["Coin Change","Dynamic programming","M"],["Longest Common Subsequence","Dynamic programming","M"],
+  ["Subsets","Backtracking","M"]
+];
+
+const CARDS=[
+  {c:"Complexity",q:"What does O(log n) mean in practice?",a:"The work grows very slowly: each step cuts the problem in half. Binary search on 1 million items needs about 20 steps.",s:5},
+  {c:"Complexity",q:"Time vs space complexity?",a:"Time: how the number of steps grows with input size. Space: how much extra memory grows. Interviewers want both.",s:5},
+  {c:"Arrays",q:"Why is appending to a dynamic array O(1) amortised?",a:"When full, it doubles its capacity and copies everything once. Spread over all appends, each costs O(1) on average.",s:1},
+  {c:"Hashing",q:"Why can a hash table be O(n) in the worst case?",a:"If many keys hash to the same bucket (collisions), a lookup has to scan all of them. Good hash functions make this rare.",s:2},
+  {c:"Linked list",q:"Array vs linked list: when to use which?",a:"Array: fast access by index, cache-friendly. Linked list: fast insert/delete at a known node, no resizing.",s:1},
+  {c:"Stack & queue",q:"Stack vs queue?",a:"Stack: last in, first out (undo, brackets, DFS). Queue: first in, first out (BFS, scheduling).",s:1},
+  {c:"Sorting",q:"What does \"stable sort\" mean?",a:"Equal items keep their original order. Merge sort and insertion sort are stable; quick sort and heap sort are not.",s:5},
+  {c:"Sorting",q:"Merge sort vs quick sort?",a:"Merge sort: always O(n log n), stable, needs O(n) extra space. Quick sort: O(n log n) average, O(n²) worst, in place.",s:2},
+  {c:"Trees",q:"The three DFS traversals of a binary tree?",a:"Preorder: root, left, right. Inorder: left, root, right (gives sorted order for a BST). Postorder: left, right, root.",s:1},
+  {c:"Trees",q:"When does a BST become slow?",a:"When it is unbalanced, e.g. inserting already-sorted data makes it a chain: search becomes O(n). Balanced trees stay O(log n).",s:2},
+  {c:"Heap",q:"What is a heap good for?",a:"Getting the smallest (or largest) item fast: peek O(1), insert and remove O(log n). Used for priority queues and top-k problems.",s:2},
+  {c:"Graphs",q:"Adjacency list vs adjacency matrix?",a:"List: O(V + E) space, best for sparse graphs. Matrix: O(V²) space, O(1) edge check, fine for dense graphs.",s:1},
+  {c:"Graphs",q:"BFS vs DFS?",a:"BFS uses a queue and finds shortest paths in unweighted graphs. DFS uses a stack/recursion and is good for exploring everything, cycles and components.",s:2},
+  {c:"Graphs",q:"When can't you use Dijkstra?",a:"When some edge weights are negative. Use Bellman-Ford instead.",s:2},
+  {c:"Techniques",q:"Greedy vs dynamic programming?",a:"Greedy takes the best choice now and never looks back. DP tries all choices but stores answers to overlapping subproblems.",s:3},
+  {c:"Techniques",q:"Two signs a problem needs DP?",a:"1) Overlapping subproblems: the same smaller problem is solved many times. 2) Optimal substructure: the best answer is built from best sub-answers.",s:3},
+  {c:"Interview",q:"How to start any coding interview question?",a:"Restate the problem, ask about edge cases, give the brute force with its complexity, then improve it step by step.",s:6},
+  {c:"Interview",q:"Edge cases to always test?",a:"Empty input, one element, duplicates, negative numbers, already sorted, very large input.",s:6},
+];
+
+/* ---------- storage ---------- */
+const KEY="groundedai-dsa-v1";
+let state={done:{},prob:{},best:null,theme:""};
+try{const raw=localStorage.getItem(KEY);if(raw)state=Object.assign(state,JSON.parse(raw));}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}};
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cite=n=>`<a class="cite" href="#src-${n}" data-src="${n}" title="${esc(SOURCES[n-1].t)}">[${n}]</a>`;
+
+/* ---------- theme ---------- */
+function applyTheme(){document.documentElement.dataset.theme=state.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+$("#themeBtn").onclick=()=>{state.theme=document.documentElement.dataset.theme==="dark"?"light":"dark";save();applyTheme();};
+applyTheme();
+
+/* ---------- tabs ---------- */
+function showTab(t){
+  $$(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  $$(".panel").forEach(p=>p.hidden=p.dataset.panel!==t);
+  if(t==="visual") drawBars();
+  try{history.replaceState(null,"","#"+t);}catch(e){}
+}
+$$(".tab").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+/* ---------- sources ---------- */
+$("#sources").innerHTML=SOURCES.map(s=>`<div class="src" id="src-${s.n}"><span class="n">${s.n}</span><div><b>${s.u?`<a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a>`:esc(s.t)}</b><small>${esc(s.d)}</small></div></div>`).join("");
+$$(".sub .cite").forEach(c=>{const src=SOURCES[c.dataset.src-1];if(src)c.setAttribute("title",src.t);});
+document.addEventListener("click",e=>{
+  const c=e.target.closest(".cite");if(!c)return;
+  e.preventDefault();e.stopPropagation();
+  const el=document.getElementById("src-"+c.dataset.src);if(!el)return;
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1400);
+},true);
+
+/* ---------- topics ---------- */
+const totalTopics=TOPICS.reduce((a,g)=>a+g.items.length,0);
+function renderTopics(){
+  $("#groups").innerHTML=TOPICS.map((g,gi)=>{
+    const d=g.items.filter((_,i)=>state.done[gi+"-"+i]).length;
+    return `<div class="group"><h3>${g.g}<em>${d}/${g.items.length}</em></h3><div class="bar"><i style="width:${d/g.items.length*100}%"></i></div>`+
+      g.items.map(([t,s],i)=>{const id=gi+"-"+i,on=!!state.done[id];return `<label class="topic ${on?"done":""}"><input type="checkbox" data-id="${id}" ${on?"checked":""}><span>${esc(t)} ${cite(s)}</span></label>`;}).join("")+`</div>`;
+  }).join("");
+  updateStats();
+}
+$("#groups").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.checked)state.done[id]=1;else delete state.done[id];save();renderTopics();});
+
+/* ---------- big-o table ---------- */
+function renderBO(which){
+  const cols=which==="ds"?DS_COLS:SORT_COLS, rows=which==="ds"?DS:SORTS;
+  const cell=v=>Array.isArray(v)?`<span class="o ${v[1]}">${v[0]}</span>`:esc(v);
+  $("#boTable").innerHTML=`<thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td${i===r.length-1&&which==="ds"?' style="white-space:normal;color:var(--muted);min-width:220px"':""}>${cell(v)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+}
+$("#boChips").onclick=e=>{const b=e.target.closest("[data-bo]");if(!b)return;$$("#boChips .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));renderBO(b.dataset.bo);};
+renderBO("ds");
+
+/* ---------- stats ---------- */
+function updateStats(){
+  const d=Object.keys(state.done).length, pct=Math.round(d/totalTopics*100);
+  $("#sTopics").textContent=`${d}/${totalTopics}`;
+  $("#ringTxt").textContent=pct+"%"; $("#ringVal").style.strokeDashoffset=226.2*(1-pct/100);
+  const solved=PROBLEMS.filter(p=>state.prob[p[0]]==="solved").length, rev=PROBLEMS.filter(p=>state.prob[p[0]]==="revise").length;
+  $("#sSolved").textContent=`${solved}/${PROBLEMS.length}`; $("#sRevise").textContent=rev;
+  $("#sBest").textContent=state.best==null?"–":state.best+"/10";
+}
+
+/* ---------- visualiser ---------- */
+const V={frames:[],i:0,timer:null,arr:[]};
+const SPEEDS=[700,420,240,120,50], SPEEDN=["Slow","Steady","Normal","Fast","Very fast"];
+const INFO={
+  bubble:"<b>Bubble sort</b> compares neighbours and swaps them if they're out of order, so the largest value \"bubbles\" to the end each pass. O(n²) average; O(n) if already sorted, because it stops early when a pass makes no swaps.",
+  selection:"<b>Selection sort</b> finds the smallest remaining value and swaps it into place. Always O(n²) comparisons, but at most n swaps.",
+  insertion:"<b>Insertion sort</b> takes each value and slides it left into the sorted part, like sorting playing cards. O(n²) average but very fast on nearly-sorted data.",
+  merge:"<b>Merge sort</b> splits the array in halves, sorts each half and merges them back. Always O(n log n), stable, but needs O(n) extra space.",
+  quick:"<b>Quick sort</b> picks a pivot (here the last value), puts smaller values left of it and larger right, then repeats on each side. O(n log n) average, O(n²) worst, e.g. on already-sorted input with this pivot.",
+  binary:"<b>Binary search</b> needs a sorted array. It checks the middle and throws away the half that can't contain the target. O(log n): about 20 steps for a million items.",
+  linear:"<b>Linear search</b> checks every element in turn. O(n), but works on unsorted data."
+};
+function randArr(n){return Array.from({length:n},()=>5+Math.floor(Math.random()*95));}
+function build(){
+  const algo=$("#vAlgo").value, a=V.arr.slice(), F=[]; let cmp=0,swp=0;
+  const snap=(hl,msg,extra={})=>F.push({a:a.slice(),hl,msg,cmp,swp,...extra});
+  const done=new Set();
+  if(algo==="bubble"){
+    snap({},"Start: compare neighbours left to right.");
+    for(let i=0;i<a.length-1;i++){let swapped=false;
+      for(let j=0;j<a.length-1-i;j++){cmp++;snap({cmp:[j,j+1],ok:[...done]},`Compare ${a[j]} and ${a[j+1]}.`);
+        if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];swp++;swapped=true;snap({swp:[j,j+1],ok:[...done]},`${a[j+1]} > ${a[j]}, so swap.`);}}
+      done.add(a.length-1-i);
+      if(!swapped){for(let k=0;k<a.length;k++)done.add(k);snap({ok:[...done]},`No swaps in this pass, so the array is sorted. Stop early.`);break;}
+    }
+    for(let k=0;k<a.length;k++)done.add(k);
+  } else if(algo==="selection"){
+    snap({},"Start: find the smallest value in the unsorted part.");
+    for(let i=0;i<a.length-1;i++){let m=i;
+      for(let j=i+1;j<a.length;j++){cmp++;snap({cmp:[m,j],ok:[...done]},`Smallest so far: ${a[m]}. Check ${a[j]}.`);if(a[j]<a[m])m=j;}
+      if(m!==i){[a[i],a[m]]=[a[m],a[i]];swp++;snap({swp:[i,m],ok:[...done]},`Swap ${a[i]} into position ${i+1}.`);}
+      done.add(i);
+    }
+    for(let k=0;k<a.length;k++)done.add(k);
+  } else if(algo==="insertion"){
+    snap({},"Start: the first value on its own is already sorted.");
+    for(let i=1;i<a.length;i++){let j=i;
+      while(j>0){cmp++;snap({cmp:[j-1,j]},`Compare ${a[j-1]} and ${a[j]}.`);
+        if(a[j-1]>a[j]){[a[j-1],a[j]]=[a[j],a[j-1]];swp++;snap({swp:[j-1,j]},`Slide ${a[j-1]} left.`);j--;}else break;}
+    }
+    for(let k=0;k<a.length;k++)done.add(k);
+  } else if(algo==="merge"){
+    snap({},"Start: merge runs of size 1, then 2, then 4…");
+    for(let w=1;w<a.length;w*=2){
+      for(let lo=0;lo<a.length-w;lo+=2*w){
+        const mid=lo+w, hi=Math.min(lo+2*w,a.length), L=a.slice(lo,mid), R=a.slice(mid,hi); let i=0,j=0,k=lo;
+        while(i<L.length&&j<R.length){cmp++;snap({cmp:[lo+i,mid+j],range:[lo,hi-1]},`Merge [${lo+1}–${hi}]: compare ${L[i]} and ${R[j]}.`);
+          a[k]=L[i]<=R[j]?L[i++]:R[j++];swp++;snap({swp:[k],range:[lo,hi-1]},`Write ${a[k]} to position ${k+1}.`);k++;}
+        while(i<L.length){a[k]=L[i++];swp++;snap({swp:[k],range:[lo,hi-1]},`Copy the rest: ${a[k]}.`);k++;}
+        while(j<R.length){a[k]=R[j++];swp++;snap({swp:[k],range:[lo,hi-1]},`Copy the rest: ${a[k]}.`);k++;}
+      }
+    }
+    for(let k=0;k<a.length;k++)done.add(k);
+  } else if(algo==="quick"){
+    snap({},"Start: pick the last value as the pivot.");
+    const qs=(lo,hi)=>{ if(lo>hi)return; if(lo===hi){done.add(lo);return;}
+      const p=a[hi]; let i=lo;
+      for(let j=lo;j<hi;j++){cmp++;snap({cmp:[j,hi],range:[lo,hi],ok:[...done]},`Pivot ${p}: is ${a[j]} smaller?`);
+        if(a[j]<p){if(i!==j){[a[i],a[j]]=[a[j],a[i]];swp++;snap({swp:[i,j],range:[lo,hi],ok:[...done]},`Yes: move ${a[i]} to the left side.`);}i++;}}
+      if(i!==hi){[a[i],a[hi]]=[a[hi],a[i]];swp++;}
+      done.add(i);snap({swp:[i],range:[lo,hi],ok:[...done]},`Place pivot ${p} at position ${i+1}: its final spot.`);
+      qs(lo,i-1);qs(i+1,hi);};
+    qs(0,a.length-1);
+    for(let k=0;k<a.length;k++)done.add(k);
+  } else if(algo==="binary"){
+    const t=+$("#vTarget").value; let lo=0,hi=a.length-1,found=-1;
+    snap({range:[lo,hi]},`Search for ${t} in the sorted array.`);
+    while(lo<=hi){const m=(lo+hi)>>1;cmp++;snap({mid:[m],range:[lo,hi]},`Middle is ${a[m]} (position ${m+1}).`);
+      if(a[m]===t){found=m;break;} if(a[m]<t){lo=m+1;snap({range:[lo,hi]},`${a[m]} < ${t}: throw away the left half.`);}else{hi=m-1;snap({range:[lo,hi]},`${a[m]} > ${t}: throw away the right half.`);}}
+    F.push({a:a.slice(),hl:found>=0?{hit:[found]}:{},msg:found>=0?`Found ${t} at position ${found+1} after ${cmp} comparison${cmp>1?"s":""}.`:`${t} is not in the array (${cmp} comparisons).`,cmp,swp,final:true});
+    return F;
+  } else if(algo==="linear"){
+    const t=+$("#vTarget").value; let found=-1;
+    snap({},`Search for ${t}, one element at a time.`);
+    for(let i=0;i<a.length;i++){cmp++;snap({cmp:[i],out:[...Array(i).keys()]},`Is ${a[i]} equal to ${t}?`);if(a[i]===t){found=i;break;}}
+    F.push({a:a.slice(),hl:found>=0?{hit:[found]}:{},msg:found>=0?`Found ${t} at position ${found+1} after ${cmp} comparison${cmp>1?"s":""}.`:`${t} is not in the array (${cmp} comparisons).`,cmp,swp,final:true});
+    return F;
+  }
+  F.push({a:a.slice(),hl:{ok:[...done]},msg:`Sorted with ${cmp} comparisons and ${swp} ${algo==="merge"?"writes":"swaps"}.`,cmp,swp,final:true});
+  return F;
+}
+function isSearch(){return ["binary","linear"].includes($("#vAlgo").value);}
+function newArray(kind){
+  stop(); const n=+$("#vSize").value;
+  V.arr=randArr(n);
+  if(kind==="sorted"||$("#vAlgo").value==="binary") V.arr.sort((x,y)=>x-y);
+  if(kind==="reversed") V.arr.sort((x,y)=>y-x);
+  if(isSearch()){ const t=$("#vTarget"); t.value=Math.random()<0.8?V.arr[Math.floor(Math.random()*n)]:Math.min(99,Math.max(...V.arr)+1); }
+  reset();
+}
+function reset(){stop();V.frames=build();V.i=0;drawBars();}
+function drawBars(){
+  const f=V.frames[V.i]||{a:V.arr,hl:{},msg:"",cmp:0,swp:0}, hl=f.hl||{}, max=Math.max(...f.a,1);
+  const has=(k,i)=>(hl[k]||[]).includes(i);
+  const inRange=i=>!hl.range||(i>=hl.range[0]&&i<=hl.range[1]);
+  const showNums=f.a.length<=20;
+  $("#stage").innerHTML=f.a.map((v,i)=>{
+    let c=has("hit",i)?"hit":has("swp",i)?"swp":has("cmp",i)?"cmp":has("mid",i)?"mid":has("ok",i)?"ok":"";
+    if(!inRange(i)||has("out",i)) c+=" out";
+    return `<div class="vb ${c}" style="height:${Math.max(4,v/max*100)}%">${showNums?`<span>${v}</span>`:""}</div>`;
+  }).join("");
+  $("#vMsg").textContent=V.i===0&&!V.timer?(f.msg+" Press Play or Step."):f.msg;
+  $("#vStep").textContent=V.i; $("#vTotal").textContent=Math.max(0,V.frames.length-1);
+  $("#vCmp").textContent=f.cmp; $("#vSwp").textContent=f.swp;
+  $("#vSwpBox").hidden=isSearch();
+  $("#vBack").disabled=V.i===0; $("#vNext").disabled=V.i>=V.frames.length-1;
+  $("#vPlay").textContent=V.timer?"⏸ Pause":V.i>=V.frames.length-1?"↺ Replay":"▶ Play";
+}
+function stop(){if(V.timer){clearInterval(V.timer);V.timer=null;}}
+function play(){
+  if(V.timer){stop();drawBars();return;}
+  if(V.i>=V.frames.length-1)V.i=0;
+  V.timer=setInterval(()=>{if(V.i<V.frames.length-1){V.i++;drawBars();}else{stop();drawBars();}},SPEEDS[$("#vSpeed").value-1]);
+  drawBars();
+}
+$("#vPlay").onclick=play;
+$("#vNext").onclick=()=>{stop();if(V.i<V.frames.length-1)V.i++;drawBars();};
+$("#vBack").onclick=()=>{stop();if(V.i>0)V.i--;drawBars();};
+$("#vShuffle").onclick=()=>newArray();
+$("#vSorted").onclick=()=>newArray("sorted");
+$("#vReverse").onclick=()=>newArray("reversed");
+$("#vAlgo").onchange=()=>{$("#vTargetBox").hidden=!isSearch();$("#vInfo").innerHTML=INFO[$("#vAlgo").value];
+  $("#vSorted").hidden=$("#vReverse").hidden=$("#vAlgo").value==="binary";newArray();};
+$("#vSize").oninput=e=>{$("#vSizeV").textContent=e.target.value;newArray();};
+$("#vSpeed").oninput=e=>{$("#vSpeedV").textContent=SPEEDN[e.target.value-1];if(V.timer){stop();play();}};
+$("#vTarget").onchange=()=>reset();
+$("#vInfo").innerHTML=INFO.bubble;
+V.arr=randArr(12);V.frames=build();
+
+/* ---------- pattern quiz ---------- */
+let qset=[],qi=0,score=0,answers=[];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function startQuiz(){
+  qset=shuffle(QUIZ).slice(0,10).map(q=>({...q,o:shuffle([q.a,...shuffle(PATTERNS.filter(p=>p!==q.a)).slice(0,3)])}));
+  qi=0;score=0;answers=[];renderQuiz();
+}
+function renderQuiz(){
+  const box=$("#quiz");
+  if(qi>=qset.length){
+    if(state.best==null||score>state.best){state.best=score;save();}updateStats();
+    const msg=score>=9?"Interview-ready pattern spotting.":score>=6?"Good. Revise the ones you missed.":"Keep practising: read the explanations below.";
+    box.innerHTML=`<div class="result"><b>${score}/10</b>${msg}</div><ol class="review">${qset.map((q,i)=>`<li>${answers[i]?"✅":"❌"} ${esc(q.q)} → <b>${esc(q.a)}</b></li>`).join("")}</ol><div class="qfoot"><span></span><button class="btn primary" id="restart">New quiz</button></div>`;
+    $("#restart").onclick=startQuiz; return;
+  }
+  const q=qset[qi];
+  box.innerHTML=`<div class="qhead"><span>Question ${qi+1} of 10</span><span id="qScore">Score: ${score}</span></div><div class="qbar"><i style="width:${qi*10}%"></i></div>
+    <p class="qtext">${esc(q.q)}</p><div class="opts">${q.o.map((o,i)=>`<button class="opt" data-o="${esc(o)}"><b>${"ABCD"[i]}</b><span>${esc(o)}</span></button>`).join("")}</div>
+    <div class="explain" id="explain"></div><div class="qfoot"><button class="btn" id="skip">Skip</button><button class="btn primary" id="next" disabled>Next →</button></div>`;
+  $$("#quiz .opt").forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===q.a;answers[qi]=ok;if(ok)score++;
+    $$("#quiz .opt").forEach(x=>{x.disabled=true;if(x.dataset.o===q.a)x.classList.add("right");else if(x===b)x.classList.add("wrong");});
+    const ex=$("#explain");ex.innerHTML=`<b>${ok?"Correct.":"Not quite: it's "+esc(q.a)+"."}</b> ${esc(q.e)} ${cite(q.s)}`;ex.classList.add("show");
+    $("#next").disabled=false;$("#skip").disabled=true;$("#qScore").textContent="Score: "+score;
+    $("#next").textContent=qi===9?"See score →":"Next →";
+  });
+  $("#skip").onclick=()=>{answers[qi]=false;qi++;renderQuiz();};
+  $("#next").onclick=()=>{qi++;renderQuiz();};
+}
+
+/* ---------- tracker ---------- */
+const TOPIC_LIST=["All topics",...new Set(PROBLEMS.map(p=>p[1]))];
+$("#tTopic").innerHTML=TOPIC_LIST.map(t=>`<option>${t}</option>`).join("");
+const NEXT={todo:"solved",solved:"revise",revise:"todo"}, LBL={todo:"Todo",solved:"✓ Solved",revise:"↺ Revise"};
+function renderTracker(){
+  const tp=$("#tTopic").value, st=$("#tStatus").value;
+  const list=PROBLEMS.filter(p=>(tp==="All topics"||p[1]===tp)&&(st==="all"||(state.prob[p[0]]||"todo")===st));
+  $("#tracker").innerHTML=list.length?list.map(([n,t,d])=>{const s=state.prob[n]||"todo";
+    return `<div class="trow"><div class="tname"><a href="https://leetcode.com/problemset/?search=${encodeURIComponent(n)}" target="_blank" rel="noopener">${esc(n)}</a><small>${esc(t)}</small></div>
+      <span class="diff ${d}">${d==="E"?"Easy":"Medium"}</span><button class="status ${s}" data-p="${esc(n)}" aria-label="Status of ${esc(n)}: ${s}">${LBL[s]}</button></div>`;}).join("")
+    :`<p class="sub" style="text-align:center;padding:16px 0">No problems match this filter.</p>`;
+  const solved=PROBLEMS.filter(p=>state.prob[p[0]]==="solved").length;
+  $("#tCount").textContent=`${solved} of ${PROBLEMS.length} solved`; $("#tBar").style.width=solved/PROBLEMS.length*100+"%";
+  updateStats();
+}
+$("#tracker").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;const n=b.dataset.p,s=NEXT[state.prob[n]||"todo"];if(s==="todo")delete state.prob[n];else state.prob[n]=s;save();renderTracker();};
+$("#tTopic").onchange=renderTracker;$("#tStatus").onchange=renderTracker;
+
+/* ---------- flash-cards ---------- */
+let cardCat="All",order=CARDS.map((_,i)=>i),allFlipped=false;
+const cats=["All",...new Set(CARDS.map(c=>c.c))];
+$("#cardChips").innerHTML=cats.map(c=>`<button class="chip" data-c="${c}" aria-pressed="${c==="All"}">${c}</button>`).join("");
+$("#cardChips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cardCat=b.dataset.c;$$("#cardChips .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));renderCards();};
+$("#cardSearch").oninput=renderCards;
+$("#shuffleBtn").onclick=()=>{order=shuffle(order);renderCards();};
+$("#flipAll").onclick=()=>{allFlipped=!allFlipped;$$(".flip").forEach(f=>f.classList.toggle("on",allFlipped));$("#flipAll").textContent=allFlipped?"Show fronts":"Flip all";};
+function renderCards(){
+  const q=$("#cardSearch").value.trim().toLowerCase();
+  const list=order.filter(i=>{const c=CARDS[i];return(cardCat==="All"||c.c===cardCat)&&(!q||(c.q+" "+c.a+" "+c.c).toLowerCase().includes(q));});
+  $("#cards").innerHTML=list.length?list.map(i=>{const c=CARDS[i];return `<div class="flip ${allFlipped?"on":""}" tabindex="0" role="button" aria-label="Flash-card: ${esc(c.q)}"><div class="in">
+    <div class="face front"><span class="tag">${c.c}</span><div class="q">${esc(c.q)}</div><span class="hint">Tap to flip ↻</span></div>
+    <div class="face back"><div>${esc(c.a)} ${cite(c.s)}</div></div></div></div>`;}).join("")
+    :`<p class="sub" style="grid-column:1/-1;text-align:center;padding:16px 0">No cards match. Try another word.</p>`;
+}
+$("#cards").addEventListener("click",e=>{if(e.target.closest(".cite"))return;const f=e.target.closest(".flip");if(f)f.classList.toggle("on");});
+$("#cards").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("flip")){e.preventDefault();e.target.classList.toggle("on");}});
+
+/* ---------- reset ---------- */
+let armed=null;
+$("#resetAll").onclick=()=>{const b=$("#resetAll");
+  if(!armed){b.textContent="Tap again to reset";b.style.color="var(--bad)";b.style.borderColor="var(--bad)";armed=setTimeout(()=>{armed=null;b.textContent="↺ Reset progress";b.style.color=b.style.borderColor="";},3000);return;}
+  clearTimeout(armed);armed=null;b.textContent="↺ Reset progress";b.style.color=b.style.borderColor="";
+  state.done={};state.prob={};state.best=null;save();renderTopics();renderTracker();startQuiz();};
+
+renderTopics();renderTracker();startQuiz();renderCards();
+const TABS=["learn","visual","practice","revise"];
+const fromHash=()=>{const t=(location.hash||"").slice(1);return TABS.includes(t)?t:"learn";};
+addEventListener("hashchange",()=>showTab(fromHash()));
+showTab(fromHash());
+</script>
+</body>
+</html>

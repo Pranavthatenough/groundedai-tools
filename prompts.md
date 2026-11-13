@@ -62,3 +62,33 @@ project 2 of that pdf"
 **Fix 4 (Page 3):** "On a phone the evidence list shows all 23 passages and is very long. Show the top 6 with a 'Show all' button; citations should still jump to passages that are hidden."
 
 **Fix 5 (Page 2):** "The 'Try this' overfitting task doesn't show a clear drop at the default noise. Tell the user to raise the noise first."
+
+## Adding tool 4: DSA Study Hub
+
+### Prompts
+
+> i wanna add DSA study hub also so now tell what else should add to the notebooklm and the this one
+
+> see i dont want any cp dsa i just need good dsa thing like for clg students and for job level dsa
+
+- I made a second notebook, **[DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53)**, with 20 links: Open Data Structures, MIT 6.006 lecture notes, Jeff Erickson's DP and greedy chapters, 10 Tech Interview Handbook cheat sheets, and the Interview Cake Big-O sheet. I also added my own DSA notes.
+- I generated a study guide, mind map, flashcards and quiz in it, and checked it cites sources and refuses off-topic questions.
+
+### Page prompt (4-part format)
+
+- **WHO:** college students revising DSA for exams, and job seekers preparing for coding interviews.
+- **WHAT:** a DSA study hub grounded in my DSA notebook. Every topic, card and quiz explanation is tagged with the source it comes from.
+- **DO:**
+  - Learn tab: a 26-topic checklist with progress, and a Big-O cheat sheet for data structures and sorting.
+  - Visualiser: 7 algorithms (bubble, selection, insertion, merge, quick sort; binary and linear search) with play/pause, step forward/back, size and speed sliders, sorted/reversed input, and comparison/swap counters.
+  - Practice: a "Which pattern?" quiz shuffled from 16 questions, and a tracker for 30 classic interview problems (Todo → Solved → Revise) with topic and status filters.
+  - Revise: 18 flip-cards with search and shuffle.
+  - Dark mode, saved progress, and a reset that asks for a second tap.
+- **RULES:** one HTML file, no internet needed, works on a phone, matches the style of tools 1–3, facts must match the sources.
+
+### Testing and fixes
+
+- Each sorting algorithm ran on 300 random, sorted and reversed arrays and always ended correctly sorted. Binary search found the right item (or correctly reported "not found") every time, never using more than log₂ n + 1 comparisons. Quick sort on reversed input shows its O(n²) worst case.
+- **Fix:** the page loaded but nothing worked, because the example tag in the checklist intro had no source number, so one line crashed and stopped the rest of the script. Added the number and made the source lookup safe.
+- All four tabs checked at phone width (390 px): no sideways scrolling and no errors.
+
