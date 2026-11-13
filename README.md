@@ -2,8 +2,6 @@
 
 Three interactive machine-learning tools built from my **GroundedAI** notebook, a source-grounded study assistant over 8 ML references. Each tool is a single HTML file, made with an AI agent without writing code by hand.
 
-**BSERC GenAI Internship · Week 1 · Project 2 ("Thinking in HTML")**
-
 **▶ Live demo:** https://pranavthatenough.github.io/groundedai-tools/
 
 **📓 Source notebook (Project 1):** [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669). Everything in these tools is grounded in this notebook and its sources.
