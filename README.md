@@ -2,8 +2,6 @@
 
 Four interactive study tools built from my source-grounded notebooks: three for **machine learning** (from my GroundedAI notebook) and one for **data structures and algorithms** (from my DSA notebook). Each tool is a single HTML file, made with an AI agent without writing code by hand.
 
-**BSERC GenAI Internship · Week 1 · Project 2 ("Thinking in HTML")**
-
 **▶ Live demo:** https://pranavthatenough.github.io/groundedai-tools/
 
 **📓 Source notebooks:** ML: [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669). Everything in tools 1–3 is grounded in this notebook. DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53), the source for tool 4.
