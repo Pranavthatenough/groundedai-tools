@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GroundedAI Tools</title>
+<meta name="description" content="Three interactive ML tools built from my GroundedAI notebook: a revision dashboard, a classification playground and a grounded answer lab.">
+<style>
+/* Layout: one narrow column — intro, then three stacked tool rows, each with its demo button on the right (stacks on phone). */
+:root{
+  --bg:#f5f5f2; --surface:#ffffff; --surface-2:#eeeef4; --ink:#1b1b22; --muted:#5f6070; --line:#dfdfe6;
+  --accent:#3b4cca; --accent-ink:#ffffff; --accent-soft:#e6e8fb;
+  --f-display:"Space Mono",ui-monospace,monospace; --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab; --line:#2e313a;
+  --accent:#8b97ff; --accent-ink:#121317; --accent-soft:#272b4a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab; --line:#2e313a;
+  --accent:#8b97ff; --accent-ink:#121317; --accent-soft:#272b4a; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+.eyebrow{font:12px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{margin:10px 0 0;font-size:clamp(28px,5vw,42px);line-height:1.1;letter-spacing:-.025em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+.intro p{margin:12px 0 0;color:var(--muted);max-width:62ch}
+.tools{display:grid;gap:14px}
+.tool{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 24px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+@media(max-width:620px){.tool{grid-template-columns:1fr}}
+.tool .opt{font:11.5px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.tool h2{margin:6px 0 4px;font-size:20px;letter-spacing:-.015em}
+.tool p{margin:0;color:var(--muted);font-size:14.5px;max-width:58ch}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tags span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink)}
+.demo{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;text-decoration:none;white-space:nowrap;transition:filter .15s,transform .15s}
+.demo:hover{filter:brightness(1.08);transform:translateX(2px)}
+.demo:focus-visible{outline:3px solid var(--accent-soft);outline-offset:3px}
+@media(max-width:620px){.demo{width:100%}}
+@media(prefers-reduced-motion:reduce){.demo{transition:none}.demo:hover{transform:none}}
+.sources{border-top:1px solid var(--line);padding-top:20px;font-size:13.5px;color:var(--muted)}
+.sources b{color:var(--ink)}
+.sources ol{margin:8px 0 0;padding-left:20px;columns:2;column-gap:28px}
+@media(max-width:620px){.sources ol{columns:1}}
+.sources li{margin-bottom:3px;break-inside:avoid}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <div class="eyebrow">BSERC GenAI Internship · Week 1 · Project 2</div>
+    <h1>GroundedAI, turned into <em>three tools you can click</em></h1>
+    <p>Each tool is a single HTML page built with AI from my <a href="https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669" target="_blank" rel="noopener" style="color:var(--accent)">GroundedAI notebook</a>, without writing code by hand. They work on a laptop or a phone. Open any one with its Live demo button.</p>
+  </header>
+
+  <section class="tools" aria-label="Tools">
+    <article class="tool">
+      <div>
+        <div class="opt">Revision dashboard</div>
+        <h2>ML Foundations Study Hub</h2>
+        <p>Tick off 17 topics, count down to the exam, flip through 16 cards and take a scored 10-question quiz. Every item links to the notebook source it came from.</p>
+        <div class="tags"><span>Topic checklist</span><span>Exam countdown</span><span>Flip-cards</span><span>Scored quiz</span><span>Dark mode</span></div>
+      </div>
+      <a class="demo" href="1-ml-revision-dashboard.html">Live demo →</a>
+    </article>
+
+    <article class="tool">
+      <div>
+        <div class="opt">Interactive 2D model</div>
+        <h2>Classification Playground</h2>
+        <p>Watch k-NN and logistic regression draw a decision boundary live. Change the data, noise and settings and see train vs test accuracy reveal overfitting.</p>
+        <div class="tags"><span>4 datasets</span><span>k-NN / logistic regression</span><span>Live training</span><span>Confusion matrix</span><span>Click to add points</span></div>
+      </div>
+      <a class="demo" href="2-classification-playground.html">Live demo →</a>
+    </article>
+
+    <article class="tool">
+      <div>
+        <div class="opt">My own idea</div>
+        <h2>Grounded Answer Lab</h2>
+        <p>Ask an ML question. A grounded assistant answers only from the notebook with clickable citations and refuses off-topic questions, next to a memory-only chatbot with mistakes to spot.</p>
+        <div class="tags"><span>Citations [1]</span><span>Source on/off</span><span>Relevance threshold</span><span>Spot the errors</span><span>Evidence ranking</span></div>
+      </div>
+      <a class="demo" href="3-grounded-answer-lab.html">Live demo →</a>
+    </article>
+
+    <article class="tool">
+      <div>
+        <div class="opt">Project 1 · The source</div>
+        <h2>GroundedAI notebook</h2>
+        <p>The source-grounded study assistant these tools are built on. It answers only from 8 ML references and cites every claim.</p>
+        <div class="tags"><span>Source-grounded</span><span>Cited answers</span><span>8 references</span></div>
+      </div>
+      <a class="demo" href="https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669" target="_blank" rel="noopener">Open notebook ↗</a>
+    </article>
+  </section>
+
+  <footer class="sources">
+    <p style="margin:0 0 12px"><a href="https://github.com/Pranavthatenough/groundedai-tools" style="color:var(--accent)">Source code on GitHub</a> · Each tool also works offline: download it and double-click.</p>
+    <b>Grounded in my <a href="https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669" target="_blank" rel="noopener" style="color:var(--accent)">GroundedAI notebook</a> and its sources</b>
+    <ol>
+      <li>Dive into Deep Learning</li>
+      <li>Google Machine Learning Crash Course</li>
+      <li>Attention Is All You Need (2017)</li>
+      <li>scikit-learn documentation</li>
+      <li>PyTorch tutorials</li>
+      <li>My GroundedAI notes</li>
+    </ol>
+  </footer>
+</div>
+</body>
+</html>

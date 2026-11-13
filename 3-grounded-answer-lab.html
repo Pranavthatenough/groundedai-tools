@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grounded Answer Lab · GroundedAI</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#fff; --surface-2:#f0ede6; --ink:#1b1b1f; --muted:#62626b; --line:#e2ded5;
+  --accent:#3b4cca; --accent-soft:#e6e8fb; --good:#1f8a57; --good-soft:#dff3e8; --bad:#c0392b; --bad-soft:#fbe4e1;
+  --warn:#8a5600; --warn-soft:#fff2d9; --mark:#ffe58a; --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05);
+}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab; --line:#2e313a;
+  --accent:#8b97ff; --accent-soft:#272b4a; --good:#4cc38a; --good-soft:#1b3328; --bad:#ff7a6b; --bad-soft:#3a2120;
+  --warn:#f0c070; --warn-soft:#3a2f17; --mark:#6b5a12; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+header small{display:block;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+header h1{margin:2px 0 0;font-size:clamp(22px,4vw,30px);letter-spacing:-.02em}
+header h1 span{color:var(--accent)}
+header p{margin:4px 0 0;color:var(--muted);max-width:680px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;transition:.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{color:#fff;filter:brightness(1.08)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ask{display:flex;gap:8px;flex-wrap:wrap}
+.ask input{flex:1;min-width:200px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:15px}
+.ask input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:12.5px;text-align:left}
+.chip:hover{border-color:var(--accent)}
+.chip.off{border-style:dashed}
+.pipe{display:flex;align-items:center;gap:6px;margin-top:14px;font-size:12.5px;flex-wrap:wrap}
+.pipe span{padding:5px 10px;border-radius:8px;background:var(--surface-2);color:var(--muted);transition:.25s}
+.pipe span.on{background:var(--accent);color:#fff}
+.pipe i{color:var(--muted);font-style:normal}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;margin-top:16px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface-2);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.answers{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin-top:12px}
+.answers.one{grid-template-columns:1fr}
+@media(max-width:700px){.answers{grid-template-columns:1fr}}
+.ans{border-radius:12px;border:1px solid var(--line);padding:14px;position:relative}
+.ans.g{border-top:4px solid var(--good)}
+.ans.m{border-top:4px solid var(--bad)}
+.ans h3{margin:0 0 2px;font-size:14px}
+.ans .tag{font-size:12px;color:var(--muted);margin-bottom:10px}
+.ans p{margin:0 0 8px}
+.ans .refuse{background:var(--warn-soft);color:var(--warn);padding:10px 12px;border-radius:10px;font-size:14px}
+.c{display:inline-block;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:0;border-radius:5px;padding:0 6px;margin:0 1px;vertical-align:1px}
+.c:hover,.c.act{background:var(--accent);color:#fff}
+.trust{margin-top:12px;font-size:12.5px;color:var(--muted)}
+.meter{height:6px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;transition:width .4s}
+.wrong{background:var(--bad-soft);border-bottom:2px solid var(--bad);border-radius:3px;padding:0 2px}
+.fixes{margin:10px 0 0;padding:10px 12px 10px 28px;border-radius:10px;background:var(--surface-2);font-size:13.5px;display:none}
+.fixes.show{display:block}
+.fixes li{margin-bottom:6px}
+.ctl{margin-bottom:16px}
+.ctl:last-child{margin-bottom:0}
+.ctl .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px}
+.ctl .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ctl .help{font-size:12px;color:var(--muted);margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.src{display:flex;gap:9px;align-items:flex-start;padding:6px 4px;font-size:13px;cursor:pointer;border-radius:8px}
+.src:hover{background:var(--surface-2)}
+.src input{accent-color:var(--accent);width:16px;height:16px;margin-top:2px;flex:none}
+.src small{display:block;color:var(--muted)}
+.sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
+.sw input{accent-color:var(--accent);width:16px;height:16px}
+.ev{display:grid;gap:8px}
+.pas{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;transition:.25s;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}
+.pas .num{grid-row:span 2;font-weight:700;color:var(--muted);min-width:26px}
+.pas.used{border-color:var(--good)}
+.pas.used .num{color:var(--good)}
+.pas.dim{opacity:.45}
+.pas.flash{box-shadow:0 0 0 3px var(--accent);border-color:var(--accent)}
+.pas .meta{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.pas .bar{flex:1;min-width:60px;max-width:140px;height:5px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.pas .bar i{display:block;height:100%;background:var(--accent)}
+.pas .why{font-size:11.5px;padding:1px 7px;border-radius:999px;background:var(--surface-2)}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.empty{color:var(--muted);text-align:center;padding:18px;font-size:14px}
+.legend{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin:14px 0 0 max(16px,env(safe-area-inset-left,0px));padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font:13px system-ui,sans-serif">← All projects</a>
+<div class="wrap">
+<header>
+  <div>
+    <small>GroundedAI · My own idea</small>
+    <h1>Grounded Answer <span>Lab</span></h1>
+    <p>Ask an ML question and watch how a source-grounded assistant finds evidence, cites every claim, and refuses when the sources don't cover it — next to a chatbot answering from memory.</p>
+  </div>
+  <button class="btn" id="themeBtn">◐ Theme</button>
+</header>
+
+<section class="card">
+  <form class="ask" id="askForm">
+    <input id="q" type="search" autocomplete="off" placeholder="Ask about ML, deep learning, Transformers, PyTorch…" aria-label="Your question">
+    <button class="btn primary" type="submit">Ask →</button>
+  </form>
+  <div class="presets" id="presets"></div>
+  <div class="pipe" aria-hidden="true">
+    <span data-s="0">① Question</span><i>→</i><span data-s="1">② Retrieve from enabled sources</span><i>→</i><span data-s="2">③ Rank & apply threshold</span><i>→</i><span data-s="3">④ Answer with citations</span>
+  </div>
+</section>
+
+<div class="layout">
+  <div>
+    <section class="card">
+      <h2>Answers
+        <span class="seg" id="modeSeg" style="margin-left:auto">
+          <button data-v="compare" aria-pressed="true">Compare</button>
+          <button data-v="g" aria-pressed="false">Grounded only</button>
+          <button data-v="m" aria-pressed="false">Memory only</button>
+        </span>
+      </h2>
+      <div class="answers" id="answers"><div class="empty" style="grid-column:1/-1">Pick a question above or type your own.</div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Evidence <span style="font-weight:400;color:var(--muted);font-size:13px" id="evCount"></span></h2>
+      <div class="legend">Every passage in the notebook, ranked by how well it matches your question. <b style="color:var(--good)">Green</b> = used in the answer. Faded = below threshold or source switched off. Click a citation in the answer to jump here.</div>
+      <div class="ev" id="ev"></div>
+    </section>
+  </div>
+
+  <aside class="card">
+    <h2>Notebook controls</h2>
+    <div class="ctl">
+      <div class="row"><span>Sources (switch off to see answers change)</span></div>
+      <div id="srcList"></div>
+    </div>
+    <div class="ctl">
+      <div class="row"><span>Passages to use (top-k)</span><b id="kV"></b></div>
+      <input type="range" id="k" min="1" max="5" value="3">
+    </div>
+    <div class="ctl">
+      <div class="row"><span>Relevance threshold</span><b id="thV"></b></div>
+      <input type="range" id="th" min="0.02" max="0.5" step="0.01" value="0.12">
+      <div class="help">Below this score a passage doesn't count as evidence. Raise it to make the assistant stricter about saying “not in my sources”.</div>
+    </div>
+    <div class="ctl">
+      <label class="sw"><input type="checkbox" id="hl" checked> Highlight matched words</label>
+    </div>
+    <div class="ctl"><button class="btn" id="resetBtn" style="width:100%">↺ Reset controls</button></div>
+  </aside>
+</div>
+<footer>Built for the BSERC GenAI Internship · Week 1 · Project 2. Passages are my own short summaries of the sources in my GroundedAI notebook. The “memory” answers are simulated and contain deliberate errors for comparison.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let theme=null;try{theme=localStorage.getItem("gai-theme")}catch(e){}
+function applyTheme(){document.documentElement.dataset.theme=theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+$("#themeBtn").onclick=()=>{theme=document.documentElement.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("gai-theme",theme)}catch(e){};applyTheme();};
+applyTheme();
+
+const SOURCES=[
+  {id:1,t:"Dive into Deep Learning",d:"Open textbook (D2L)"},
+  {id:2,t:"Google ML Crash Course",d:"Google for Developers"},
+  {id:3,t:"Attention Is All You Need",d:"Vaswani et al., 2017"},
+  {id:4,t:"scikit-learn documentation",d:"User guide & API"},
+  {id:5,t:"PyTorch tutorials",d:"Learn the basics"},
+  {id:6,t:"GroundedAI notes",d:"My notebook notes"}
+];
+const P=[
+  [1,"Overfitting happens when a model fits the training data so closely that it also learns its noise: training error keeps falling while error on held-out validation data rises."],
+  [1,"Regularisation such as weight decay adds a penalty for large weights to the loss, which pushes the model toward simpler solutions and reduces overfitting. Early stopping and more training data also help."],
+  [1,"Backpropagation computes the gradient of the loss with respect to every parameter by applying the chain rule backwards, from the output layer to the input layer."],
+  [1,"Minibatch stochastic gradient descent updates the parameters using the gradient averaged over a small random batch of examples, scaled by the learning rate."],
+  [2,"Machine learning is the process of training a piece of software, called a model, to make useful predictions or generate content from data."],
+  [2,"Supervised learning trains a model on examples that include the correct answer, called the label, so it can predict labels for new examples."],
+  [2,"Data should be split into training, validation and test sets. The test set must stay unseen during training and tuning so it gives an honest estimate of performance on new data."],
+  [2,"Precision is the share of positive predictions that were actually positive, TP ÷ (TP + FP). Recall is the share of actual positives the model found, TP ÷ (TP + FN)."],
+  [2,"Logistic regression outputs a probability between 0 and 1 by passing a weighted sum of the features through the sigmoid function; a threshold turns it into a class."],
+  [3,"The Transformer is built entirely on attention mechanisms and drops recurrence and convolutions, which makes training far more parallel."],
+  [3,"Scaled dot-product attention computes softmax(QKᵀ ÷ √dₖ)·V. Dividing by √dₖ stops large dot products from pushing the softmax into regions where gradients are extremely small."],
+  [3,"Multi-head attention runs several attention heads in parallel on different learned projections of queries, keys and values. The base Transformer uses 8 heads."],
+  [3,"Since the Transformer has no recurrence, positional encodings made of sine and cosine functions of different frequencies are added to the input embeddings to give it word order."],
+  [4,"Every scikit-learn estimator is trained with fit(X, y) and then used with predict(X) on new samples; score() reports a default metric such as accuracy."],
+  [4,"KNeighborsClassifier predicts the class of a sample by a majority vote among its k nearest neighbours in the training set."],
+  [4,"Clustering methods such as KMeans group unlabelled samples by similarity. They are a form of unsupervised learning because no labels are used."],
+  [5,"Tensors are PyTorch's core data structure. They are like NumPy arrays but can run on GPUs and record operations for automatic differentiation."],
+  [5,"torch.autograd tracks operations on tensors with requires_grad=True. Calling loss.backward() computes the gradients and stores them in each parameter's .grad; it does not update the weights."],
+  [5,"A typical training step is: optimizer.zero_grad(), compute predictions, compute the loss, loss.backward(), then optimizer.step() to update the weights."],
+  [6,"Language models can hallucinate: they produce fluent, confident statements, including fake citations, that no source supports."],
+  [6,"A grounded assistant retrieves passages from sources the user chose, answers only from them, and attaches a citation to every claim so it can be checked."],
+  [6,"When the retrieved evidence is too weak, a grounded system should say the sources don't cover the question instead of guessing."],
+  [6,"AI is the broad field of making machines act intelligently; machine learning is a subset that learns from data; deep learning is a subset of ML that uses many-layered neural networks."]
+].map(([s,t],i)=>({id:i,s,t}));
+
+const PRESETS=[
+  {q:"How many attention heads does the base Transformer use, and why scale by √dk?",
+   mem:["The original Transformer uses <x>12 attention heads</x> in every layer.","Scaling by √dₖ is done mainly <x>to speed up matrix multiplication on GPUs</x>.","The architecture was introduced by Google researchers <x>in 2018</x>."],
+   fix:["The base model uses 8 heads.","The scaling keeps softmax out of tiny-gradient regions; it isn't a speed trick.","The paper is from 2017."]},
+  {q:"What is overfitting and how do I fix it?",
+   mem:["Overfitting is when a model memorises the training data and does worse on new data.","The standard fix is dropout with a rate of exactly 0.5, <x>as proven by Smith et al. (2019)</x>.","<x>Adding more layers always reduces overfitting</x>."],
+   fix:["That citation doesn't exist in any of my sources — a classic invented reference.","More layers usually make overfitting worse; regularisation, early stopping and more data help."]},
+  {q:"What is the difference between precision and recall?",
+   mem:["<x>Precision is the share of actual positives the model found</x>, and <x>recall is the share of positive predictions that were correct</x>.","Both are always equal when the dataset is balanced."],
+   fix:["The definitions are swapped. Precision = TP ÷ (TP + FP); recall = TP ÷ (TP + FN).","They are not guaranteed to be equal, balanced data or not."]},
+  {q:"What does loss.backward() do in PyTorch?",
+   mem:["loss.backward() <x>updates the model's weights</x> using the gradients.","It also <x>resets the gradients to zero</x> so you don't need zero_grad()."],
+   fix:["backward() only computes gradients; optimizer.step() updates the weights.","It accumulates gradients; you still need optimizer.zero_grad()."]},
+  {q:"How does k-nearest neighbours classify a point?",
+   mem:["k-NN classifies a point by <x>training a weight for each feature</x> and then taking <x>a weighted average of all training points</x>."],
+   fix:["k-NN learns no weights; it takes a majority vote of only the k nearest training points."]},
+  {q:"What is the best learning rate for training ResNet-50 on ImageNet?",off:true,
+   mem:["The best learning rate is <x>always 0.1</x>, and you should <x>never change it</x> during training."],
+   fix:["None of my sources cover ResNet-50 tuning. A confident number with no source is exactly what grounding prevents."]},
+  {q:"Who won the 2022 FIFA World Cup?",off:true,
+   mem:["Argentina won the 2022 FIFA World Cup."],
+   fix:["This may well be true, but it is outside my notebook, so it can't be checked against my sources. A grounded assistant should say so."]}
+];
+
+/* ---------- tiny TF-IDF retriever ---------- */
+const STOP=new Set("a an the is are was were be been of to in on for and or with by as at it its this that these those from how what why does do did which who whom when where can i my me you your we our into than then so such not no only also very more most use used using about there their they them he she his her will would should could has have had".split(" "));
+const WEAK=new Set("explain tell give many much difference between mean meaning work happen way good best get make fix".split(" "));
+const SYN={hallucination:"hallucinate",hallucinations:"hallucinate",hallucinating:"hallucinate",heads:"head",dk:"dₖ",sqrt:"√dₖ",nn:"neighbour",neighbor:"neighbour",neighbors:"neighbour",knn:"neighbour",
+  ai:"intelligence",ml:"machine",dl:"deep",lr:"learning-rate",gradients:"gradient",backprop:"backpropagation",transformers:"transformer",regularization:"regularisation",
+  labelled:"label",scaled:"scale",scaling:"scale",scales:"scale","√dk":"√dₖ",classify:"class",classifies:"class",classification:"class",classifier:"class",classes:"class",point:"sample",points:"sample",samples:"sample",scores:"score",labeled:"label",labels:"label",unlabeled:"unlabelled",cluster:"clustering",weights:"weight"};
+function stem(w){w=SYN[w]||w;if(w.length>5&&w.endsWith("ing"))w=w.slice(0,-3);else if(w.length>4&&/(ch|sh|x|z)es$/.test(w))w=w.slice(0,-2);else if(w.length>3&&w.endsWith("s")&&!w.endsWith("ss"))w=w.slice(0,-1);return SYN[w]||w;}
+const tok=t=>t.toLowerCase().replace(/[^a-z0-9√ₖ\s.]/g," ").replace(/\./g," ").split(/\s+/).filter(w=>w&&!STOP.has(w)).map(stem);
+const DOCS=P.map(p=>{const t=tok(p.t),tf={};t.forEach(w=>tf[w]=(tf[w]||0)+1);return{tf};});
+const DF={};DOCS.forEach(d=>Object.keys(d.tf).forEach(w=>DF[w]=(DF[w]||0)+1));
+const idf=w=>Math.log((P.length+1)/((DF[w]||0)+1))+1;
+const vec=tf=>{const v={};let n=0;for(const w in tf){v[w]=(1+Math.log(tf[w]))*idf(w);n+=v[w]**2;}n=Math.sqrt(n)||1;for(const w in v)v[w]/=n;return v;};
+DOCS.forEach(d=>d.v=vec(d.tf));
+function retrieve(q){
+  const qt=tok(q),tf={};qt.forEach(w=>tf[w]=(tf[w]||0)+1);const qv=vec(tf);
+  return P.map((p,i)=>{let s=0,hit=[];for(const w in qv)if(DOCS[i].v[w]){s+=qv[w]*DOCS[i].v[w];hit.push(w);}return{p,score:s,hit};})
+          .sort((a,b)=>b.score-a.score);
+}
+
+/* ---------- state ---------- */
+const S={q:"",preset:null,mode:"compare",k:3,th:.12,on:new Set(SOURCES.map(s=>s.id)),showFix:false};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- UI build ---------- */
+$("#presets").innerHTML=PRESETS.map((p,i)=>`<button class="chip ${p.off?"off":""}" data-i="${i}">${p.off?"🚫 ":""}${esc(p.q)}</button>`).join("");
+$("#srcList").innerHTML=SOURCES.map(s=>`<label class="src"><input type="checkbox" data-id="${s.id}" checked><span><b>[${s.id}]</b> ${esc(s.t)}<small>${esc(s.d)} · ${P.filter(p=>p.s===s.id).length} passages</small></span></label>`).join("");
+
+$("#presets").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;S.preset=+b.dataset.i;S.q=PRESETS[S.preset].q;$("#q").value=S.q;S.showFix=false;run(true);};
+$("#askForm").onsubmit=e=>{e.preventDefault();S.q=$("#q").value.trim();S.preset=PRESETS.findIndex(p=>p.q.toLowerCase()===S.q.toLowerCase());if(S.preset<0)S.preset=null;S.showFix=false;run(true);};
+$("#modeSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;S.mode=b.dataset.v;$("#modeSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));run();};
+$("#srcList").onchange=e=>{const id=+e.target.dataset.id;e.target.checked?S.on.add(id):S.on.delete(id);run();};
+const kEl=$("#k"),thEl=$("#th");
+kEl.oninput=()=>{S.k=+kEl.value;$("#kV").textContent=S.k;run();};
+thEl.oninput=()=>{S.th=+thEl.value;$("#thV").textContent=S.th.toFixed(2);run();};
+$("#hl").onchange=()=>run();
+$("#resetBtn").onclick=()=>{S.k=3;S.th=.12;S.on=new Set(SOURCES.map(s=>s.id));kEl.value=3;thEl.value=.12;$("#kV").textContent="3";$("#thV").textContent="0.12";
+  document.querySelectorAll("#srcList input").forEach(i=>i.checked=true);$("#hl").checked=true;run();};
+$("#kV").textContent=S.k;$("#thV").textContent=S.th.toFixed(2);
+
+/* ---------- pipeline animation ---------- */
+let pipeTimer=[];
+function animatePipe(){pipeTimer.forEach(clearTimeout);const st=document.querySelectorAll(".pipe span");st.forEach(s=>s.classList.remove("on"));
+  st.forEach((s,i)=>pipeTimer.push(setTimeout(()=>{st.forEach(x=>x.classList.remove("on"));s.classList.add("on");},i*220)));}
+
+/* ---------- render ---------- */
+function highlight(text,hit){
+  if(!$("#hl").checked||!hit.length)return esc(text);
+  return esc(text).replace(/[A-Za-z0-9√ₖ]+/g,w=>{const s=stem(w.toLowerCase());return hit.includes(s)&&!STOP.has(w.toLowerCase())?`<mark>${w}</mark>`:w;});
+}
+function run(anim){
+  if(anim)animatePipe();
+  if(!S.q){renderEvidence([]);return;}
+  const ranked=retrieve(S.q);
+  const avail=ranked.filter(r=>S.on.has(r.p.s));
+  // gap check: key words in the question that appear nowhere in the notebook
+  const terms=[...new Set(tok(S.q))].filter(w=>!WEAK.has(w)), gap=terms.filter(w=>!DF[w]);
+  S.gap=gap.length>=2?gap:[];
+  const notCovered=gap.length>=2&&gap.length/terms.length>=.4;
+  const used=notCovered?[]:avail.filter(r=>r.score>=S.th).slice(0,S.k);
+  const usedIds=used.map(r=>r.p.id);
+  S.notCovered=notCovered;
+  renderAnswers(used);
+  renderEvidence(ranked,usedIds);
+}
+function renderAnswers(used){
+  const box=$("#answers"),pr=S.preset!=null?PRESETS[S.preset]:null;
+  box.className="answers"+(S.mode==="compare"?"":" one");
+  let g="",m="";
+  if(S.mode!=="m"){
+    if(!used.length){
+      const off=S.on.size<SOURCES.length;
+      g=`<div class="ans g"><h3>✅ Grounded assistant</h3><div class="tag">Answers only from your enabled sources</div>
+        <div class="refuse"><b>Not in my sources.</b> ${S.notCovered
+          ?`Some passages share general words with your question, but my sources say nothing about <b>${S.gap.map(esc).join(", ")}</b>. I won't stretch them into an answer.`
+          :`None of the enabled passages scored above the ${S.th.toFixed(2)} relevance threshold, so I won't guess.${off?" Some sources are switched off — try turning them back on.":" Try lowering the threshold, or add a source that covers this."}`}</div>
+        ${trust(0,0,true)}</div>`;
+    }else{
+      const body=used.map((r,i)=>`<p>${esc(r.p.t)} <button class="c" data-p="${r.p.id}" title="${esc(SOURCES[r.p.s-1].t)}">[${i+1}]</button></p>`).join("");
+      const srcs=[...new Set(used.map(r=>r.p.s))].map(s=>SOURCES[s-1].t).join(" · ");
+      const gapNote=S.gap.length?`<div class="refuse" style="margin-bottom:10px;font-size:13px"><b>Gap:</b> my sources don't mention ${S.gap.map(esc).join(", ")}, so this answer covers only the parts they do.</div>`:"";
+      g=`<div class="ans g"><h3>✅ Grounded assistant</h3><div class="tag">From ${used.length} passage${used.length>1?"s":""}: ${esc(srcs)}</div>${gapNote}${body}${trust(used.length,used.length)}</div>`;
+    }
+  }
+  if(S.mode!=="g"){
+    if(pr){
+      const mk=s=>s.replace(/<x>(.*?)<\/x>/g,(_,t)=>S.showFix?`<span class="wrong">${t}</span>`:t);
+      const nWrong=pr.mem.join("").split("<x>").length-1;
+      m=`<div class="ans m"><h3>⚠️ Chatbot from memory <span style="font-weight:400;color:var(--muted)">(simulated)</span></h3><div class="tag">No sources, no citations, sounds just as sure</div>
+        ${pr.mem.map(s=>`<p>${mk(s)}</p>`).join("")}
+        <button class="btn" id="spot" style="padding:5px 12px;font-size:13px">${S.showFix?"Hide":"🔍 Spot the"} ${nWrong?"problems":"problem"}</button>
+        <ol class="fixes ${S.showFix?"show":""}">${pr.fix.map(f=>`<li>${esc(f)}</li>`).join("")}</ol>
+        ${trust(0,pr.mem.length)}</div>`;
+    }else{
+      m=`<div class="ans m"><h3>⚠️ Chatbot from memory <span style="font-weight:400;color:var(--muted)">(simulated)</span></h3><div class="tag">No sources, no citations</div>
+        <p>A memory-only chatbot would give a fluent, confident answer here. It might be right or wrong — but nothing in it points to a source you can open and check.</p>
+        <p style="color:var(--muted);font-size:13px">Tip: the preset questions include real examples of the kinds of mistakes memory-only answers make.</p>${trust(0,1)}</div>`;
+    }
+  }
+  box.innerHTML=g+m;
+  const sp=$("#spot");if(sp)sp.onclick=()=>{S.showFix=!S.showFix;renderAnswers(used);};
+}
+function trust(cited,total,refused){
+  if(refused)return `<div class="trust">Verifiable claims: <b>0 made, 0 invented</b> — refusing is the honest answer.<div class="meter"><i style="width:100%;background:var(--warn)"></i></div></div>`;
+  const pct=total?Math.round(cited/total*100):0;
+  return `<div class="trust">Claims with a citation: <b>${cited}/${total} (${pct}%)</b><div class="meter"><i style="width:${pct}%;background:${pct>=100?"var(--good)":"var(--bad)"}"></i></div></div>`;
+}
+function renderEvidence(ranked,usedIds=[]){
+  const ev=$("#ev");
+  if(!ranked.length){ev.innerHTML=`<div class="empty">Ask something to see which passages match.</div>`;$("#evCount").textContent=`· ${P.length} passages in the notebook`;return;}
+  const max=Math.max(ranked[0].score,.01);
+  $("#evCount").textContent=`· ${usedIds.length} used of ${P.length}`;
+  const shown=S.allEv?ranked:ranked.slice(0,6);
+  ev.innerHTML=shown.map((r,i)=>{
+    const used=usedIds.indexOf(r.p.id), off=!S.on.has(r.p.s), low=r.score<S.th;
+    const why=used>=0?`cited as [${used+1}]`:off?"source off":low?"below threshold":"not in top-k";
+    return `<div class="pas ${used>=0?"used":"dim"}" id="pas-${r.p.id}"><span class="num">#${i+1}</span>
+      <div>${highlight(r.p.t,r.hit)}</div>
+      <div class="meta"><span>[${r.p.s}] ${esc(SOURCES[r.p.s-1].t)}</span><span class="bar"><i style="width:${r.score/max*100}%"></i></span><span>score ${r.score.toFixed(2)}</span><span class="why">${why}</span></div></div>`;
+  }).join("")+`<button class="btn" id="moreEv" style="justify-self:center">${S.allEv?"Show top 6 only":`Show all ${P.length} passages`}</button>`;
+  $("#moreEv").onclick=()=>{S.allEv=!S.allEv;run();};
+}
+document.addEventListener("click",e=>{const c=e.target.closest(".c");if(!c)return;
+  let el=$("#pas-"+c.dataset.p);
+  if(!el){S.allEv=true;run();el=$("#pas-"+c.dataset.p);}
+  document.querySelectorAll(".c").forEach(x=>x.classList.toggle("act",x.dataset.p===c.dataset.p));el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1600);});
+
+/* start with an example */
+S.preset=0;S.q=PRESETS[0].q;$("#q").value=S.q;run(true);
+</script>
+</body>
+</html>

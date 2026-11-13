@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classification Playground · GroundedAI</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#fff; --surface-2:#f0ede6; --ink:#1b1b1f; --muted:#62626b; --line:#e2ded5;
+  --accent:#3b4cca; --accent-soft:#e6e8fb; --A:#e0702e; --B:#2f6fdc; --good:#1f8a57; --bad:#c0392b; --warn-soft:#fff2d9; --warn:#8a5600;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05); --plot:#fbfaf7;
+}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab; --line:#2e313a;
+  --accent:#8b97ff; --accent-soft:#272b4a; --A:#ff9257; --B:#6b9bff; --good:#4cc38a; --bad:#ff7a6b; --warn-soft:#3a2f17; --warn:#f0c070;
+  --shadow:none; --plot:#16181d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+header small{display:block;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+header h1{margin:2px 0 0;font-size:clamp(22px,4vw,30px);letter-spacing:-.02em}
+header h1 span{color:var(--accent)}
+header p{margin:4px 0 0;color:var(--muted);max-width:640px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;transition:.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{color:#fff;filter:brightness(1.08)}
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:-.01em}
+.plotwrap{position:relative}
+canvas#plot{width:100%;aspect-ratio:1/1;display:block;border-radius:10px;background:var(--plot);touch-action:manipulation;cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:10px;align-items:center}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.ring{display:inline-block;width:11px;height:11px;border-radius:50%;border:2px solid var(--muted);vertical-align:-1px;margin-right:5px}
+.xmark{color:var(--bad);font-weight:700;margin-right:4px}
+.paint{display:flex;gap:6px;align-items:center;margin-top:12px;font-size:13px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface-2);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.ctl{margin-bottom:14px}
+.ctl:last-child{margin-bottom:0}
+.ctl .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px}
+.ctl .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:6px;cursor:pointer}
+.sw input{accent-color:var(--accent);width:16px;height:16px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.hidden{display:none!important}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:480px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.m{background:var(--surface-2);border-radius:10px;padding:10px}
+.m b{display:block;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.m span{font-size:12px;color:var(--muted)}
+.cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px;font-size:12.5px;text-align:center;max-width:300px}
+.cm div{padding:7px 4px;border-radius:6px}
+.cm .h{color:var(--muted)}
+.cm .tp{background:color-mix(in srgb,var(--good) 18%,transparent)}
+.cm .er{background:color-mix(in srgb,var(--bad) 16%,transparent)}
+.cm b{font-size:17px;display:block}
+.insight{margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13.5px;background:var(--accent-soft)}
+.insight.warn{background:var(--warn-soft);color:var(--warn)}
+canvas#loss{width:100%;height:90px;display:block;background:var(--surface-2);border-radius:8px}
+.explain{font-size:14px;color:var(--ink)}
+.explain p{margin:0 0 8px}
+.explain code{background:var(--surface-2);border-radius:5px;padding:1px 5px;font-size:12.5px}
+.cite{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:0 5px}
+.tasks{margin:0;padding-left:18px;font-size:13.5px}
+.tasks li{margin-bottom:6px}
+.tasks input{accent-color:var(--good);margin-right:6px}
+.below{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+@media(max-width:900px){.below{grid-template-columns:1fr}}
+.stack>*+*{margin-top:16px}
+footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin:14px 0 0 max(16px,env(safe-area-inset-left,0px));padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font:13px system-ui,sans-serif">← All projects</a>
+<div class="wrap">
+<header>
+  <div>
+    <small>GroundedAI · Interactive 2D model</small>
+    <h1>Classification <span>Playground</span></h1>
+    <p>Watch a classifier draw its decision boundary. Change the data, the model and its settings, and see overfitting happen live.</p>
+  </div>
+  <button class="btn" id="themeBtn">◐ Theme</button>
+</header>
+
+<div class="layout">
+  <section class="card">
+    <div class="plotwrap"><canvas id="plot" aria-label="Scatter plot with decision boundary. Click to add a training point."></canvas></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--A)"></i>Class A (train)</span>
+      <span><i class="dot" style="background:var(--B)"></i>Class B (train)</span>
+      <span><i class="ring"></i>Test point</span>
+      <span><span class="xmark">✕</span>Misclassified test</span>
+    </div>
+    <div class="paint">
+      <span>Click the plot to add a point of</span>
+      <div class="seg" id="paintSeg">
+        <button aria-pressed="true" data-v="0">Class A</button>
+        <button aria-pressed="false" data-v="1">Class B</button>
+      </div>
+      <button class="btn" id="undoBtn" style="padding:5px 12px;font-size:13px">Undo</button>
+    </div>
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <h2>1 · Data</h2>
+      <div class="ctl"><div class="seg" id="dataSeg">
+        <button data-v="blobs" aria-pressed="true">Blobs</button>
+        <button data-v="moons" aria-pressed="false">Moons</button>
+        <button data-v="circles" aria-pressed="false">Circles</button>
+        <button data-v="xor" aria-pressed="false">XOR</button>
+      </div></div>
+      <div class="ctl"><div class="row"><span>Noise</span><b id="noiseV"></b></div><input type="range" id="noise" min="0" max="0.6" step="0.02" value="0.18"></div>
+      <div class="ctl"><div class="row"><span>Number of points</span><b id="nV"></b></div><input type="range" id="npts" min="40" max="400" step="10" value="200"></div>
+      <div class="ctl"><div class="row"><span>Held-out test set</span><b id="testV"></b></div><input type="range" id="testFrac" min="0.1" max="0.5" step="0.05" value="0.3"></div>
+      <div class="btns"><button class="btn" id="resample">⟳ New sample</button></div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Model</h2>
+      <div class="ctl"><div class="seg" id="modelSeg">
+        <button data-v="knn" aria-pressed="true">k-nearest neighbours</button>
+        <button data-v="logreg" aria-pressed="false">Logistic regression</button>
+      </div></div>
+      <div id="knnCtl">
+        <div class="ctl"><div class="row"><span>k (neighbours that vote)</span><b id="kV"></b></div><input type="range" id="k" min="1" max="31" step="2" value="7"></div>
+      </div>
+      <div id="lrCtl" class="hidden">
+        <div class="ctl"><div class="row"><span>Features</span></div>
+          <div class="seg" id="featSeg"><button data-v="lin" aria-pressed="true">Linear (x, y)</button><button data-v="poly" aria-pressed="false">Polynomial (up to x³)</button></div></div>
+        <div class="ctl"><div class="row"><span>Learning rate</span><b id="lrV"></b></div><input type="range" id="lr" min="-2" max="1" step="0.1" value="0"></div>
+        <div class="ctl"><div class="row"><span>Training loss</span><b id="epochV">epoch 0</b></div><canvas id="loss"></canvas></div>
+        <div class="btns"><button class="btn primary" id="trainBtn">▶ Train 300 epochs</button><button class="btn" id="stepBtn">+1 step</button><button class="btn" id="resetW">Reset weights</button></div>
+      </div>
+      <label class="sw"><input type="checkbox" id="showTest" checked> Show test points</label>
+      <label class="sw"><input type="checkbox" id="showProb" checked> Shade by confidence (not just the boundary)</label>
+    </section>
+  </div>
+</div>
+
+<div class="below">
+  <section class="card">
+    <h2>3 · How well does it generalise?</h2>
+    <div class="metrics">
+      <div class="m"><b id="trainAcc">–</b><span>train accuracy</span></div>
+      <div class="m"><b id="testAcc">–</b><span>test accuracy</span></div>
+      <div class="m"><b id="prec">–</b><span>precision (B)</span></div>
+      <div class="m"><b id="rec">–</b><span>recall (B)</span></div>
+    </div>
+    <div class="cm" id="cm"></div>
+    <div class="insight" id="insight"></div>
+  </section>
+  <section class="card">
+    <h2>What's going on <span class="cite" title="Sources from my GroundedAI notebook">grounded</span></h2>
+    <div class="explain" id="explain"></div>
+    <h2 style="margin-top:14px">Try this</h2>
+    <ol class="tasks">
+      <li><label><input type="checkbox">Moons + k-NN: raise noise to 0.4, then drag k down to 1. Train accuracy hits 100% but test drops. That's overfitting.</label></li>
+      <li><label><input type="checkbox">Circles + logistic regression, linear features: stuck near 50%. Switch to polynomial.</label></li>
+      <li><label><input type="checkbox">Set the learning rate to the max and train. Watch the loss curve jump around.</label></li>
+      <li><label><input type="checkbox">Click to add a few Class B points deep inside Class A, then compare k = 1 and k = 15.</label></li>
+    </ol>
+  </section>
+</div>
+<footer>Built for the BSERC GenAI Internship · Week 1 · Project 2. Concepts from my GroundedAI notebook: scikit-learn docs, Google ML Crash Course, Dive into Deep Learning.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+/* theme */
+let theme=null; try{theme=localStorage.getItem("gai-theme")}catch(e){}
+function applyTheme(){document.documentElement.dataset.theme=theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");draw();drawLoss();}
+$("#themeBtn").onclick=()=>{theme=document.documentElement.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("gai-theme",theme)}catch(e){};applyTheme();};
+
+/* ---------- state ---------- */
+const S={data:"blobs",noise:.18,n:200,testFrac:.3,seed:7,model:"knn",k:7,feat:"lin",lr:1,paint:0,
+  train:[],test:[],added:[],w:null,epoch:0,losses:[],training:false};
+
+/* ---------- random ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function gauss(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* ---------- datasets in [-1,1] ---------- */
+function makeData(){
+  const r=rng(S.seed),pts=[],nz=S.noise;
+  for(let i=0;i<S.n;i++){
+    const c=i%2; let x,y;
+    if(S.data==="blobs"){const cx=c?.38:-.38,cy=c?.32:-.32;x=cx+gauss(r)*(.12+nz*.6);y=cy+gauss(r)*(.12+nz*.6);}
+    else if(S.data==="moons"){const t=Math.PI*r();
+      if(!c){x=Math.cos(t)*.6-.25;y=Math.sin(t)*.6-.15;}else{x=(1-Math.cos(t))*.6-.35;y=-Math.sin(t)*.6+.3-.15;}
+      x+=gauss(r)*nz*.45;y+=gauss(r)*nz*.45;}
+    else if(S.data==="circles"){const t=2*Math.PI*r(),rad=c?.75:.3;x=Math.cos(t)*rad+gauss(r)*nz*.4;y=Math.sin(t)*rad+gauss(r)*nz*.4;}
+    else {x=r()*1.8-.9;y=r()*1.8-.9;const lab=(x*y>0)?0:1;
+      const xx=x+gauss(r)*nz*.3,yy=y+gauss(r)*nz*.3;pts.push({x:clamp(xx),y:clamp(yy),c:lab});continue;}
+    pts.push({x:clamp(x),y:clamp(y),c});
+  }
+  for(let i=pts.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[pts[i],pts[j]]=[pts[j],pts[i]];}
+  const nt=Math.round(pts.length*S.testFrac);
+  S.test=pts.slice(0,nt); S.train=pts.slice(nt).concat(S.added);
+}
+const clamp=v=>Math.max(-.98,Math.min(.98,v));
+
+/* ---------- models ---------- */
+function knnProb(x,y){
+  const k=Math.min(S.k,S.train.length); if(!k) return .5;
+  const best=[]; // keep k smallest distances
+  for(const p of S.train){const d=(p.x-x)**2+(p.y-y)**2;
+    if(best.length<k){best.push([d,p.c]);if(best.length===k)best.sort((a,b)=>b[0]-a[0]);}
+    else if(d<best[0][0]){best[0]=[d,p.c];best.sort((a,b)=>b[0]-a[0]);}}
+  return best.reduce((a,b)=>a+b[1],0)/best.length;
+}
+function phi(x,y){return S.feat==="lin"?[1,x,y]:[1,x,y,x*x,y*y,x*y,x*x*x,y*y*y,x*x*y,x*y*y];}
+const sig=z=>1/(1+Math.exp(-z));
+function lrProb(x,y){if(!S.w)return .5;const f=phi(x,y);let z=0;for(let i=0;i<f.length;i++)z+=S.w[i]*f[i];return sig(z);}
+function resetWeights(){S.w=new Array(phi(0,0).length).fill(0);S.epoch=0;S.losses=[];}
+function gdStep(){
+  const n=S.train.length; if(!n) return;
+  const g=new Array(S.w.length).fill(0); let loss=0;
+  for(const p of S.train){const f=phi(p.x,p.y);let z=0;for(let i=0;i<f.length;i++)z+=S.w[i]*f[i];
+    const pr=sig(z),e=pr-p.c; loss+=-(p.c*Math.log(pr+1e-9)+(1-p.c)*Math.log(1-pr+1e-9));
+    for(let i=0;i<f.length;i++)g[i]+=e*f[i];}
+  for(let i=0;i<g.length;i++)S.w[i]-=S.lr*g[i]/n;
+  S.epoch++; S.losses.push(loss/n);
+}
+const prob=(x,y)=>S.model==="knn"?knnProb(x,y):lrProb(x,y);
+
+/* ---------- drawing ---------- */
+const cv=$("#plot"),ctx=cv.getContext("2d");
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function hex(c){const m=c.replace("#","");return[parseInt(m.slice(0,2),16),parseInt(m.slice(2,4),16),parseInt(m.slice(4,6),16)];}
+function draw(){
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth; if(!W) return;
+  if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(W*dpr);}
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const A=hex(css("--A")),B=hex(css("--B")),toPx=v=>(v+1)/2*W;
+  ctx.clearRect(0,0,W,W);
+  // background field
+  const G=70,cell=W/G,shade=$("#showProb").checked;
+  // paint the field into a small offscreen image, then scale it up smoothly (no grid seams)
+  const off=draw.off||(draw.off=document.createElement("canvas"));off.width=G;off.height=G;
+  const octx=off.getContext("2d"),img=octx.createImageData(G,G);
+  for(let i=0;i<G;i++)for(let j=0;j<G;j++){
+    const x=(i+.5)/G*2-1,y=1-(j+.5)/G*2,p=prob(x,y);
+    const c=p>=.5?B:A, conf=shade?Math.abs(p-.5)*2:1, k=(j*G+i)*4;
+    img.data[k]=c[0];img.data[k+1]=c[1];img.data[k+2]=c[2];img.data[k+3]=Math.round((.06+.26*conf)*255);
+  }
+  octx.putImageData(img,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(off,0,0,W,W);
+  // boundary contour (marching squares, cheap version)
+  ctx.strokeStyle=css("--ink");ctx.globalAlpha=.55;ctx.lineWidth=1.6;ctx.beginPath();
+  const vals=[];for(let i=0;i<=G;i++){vals[i]=[];for(let j=0;j<=G;j++)vals[i][j]=prob(i/G*2-1,1-j/G*2)-.5;}
+  for(let i=0;i<G;i++)for(let j=0;j<G;j++){
+    const a=vals[i][j],b=vals[i+1][j],c=vals[i+1][j+1],d=vals[i][j+1],seg=[];
+    const lerp=(p,q)=>p/(p-q);
+    if((a>=0)!==(b>=0))seg.push([i+lerp(a,b),j]);
+    if((b>=0)!==(c>=0))seg.push([i+1,j+lerp(b,c)]);
+    if((d>=0)!==(c>=0))seg.push([i+lerp(d,c),j+1]);
+    if((a>=0)!==(d>=0))seg.push([i,j+lerp(a,d)]);
+    if(seg.length>=2){ctx.moveTo(seg[0][0]*cell,seg[0][1]*cell);ctx.lineTo(seg[1][0]*cell,seg[1][1]*cell);
+      if(seg.length===4){ctx.moveTo(seg[2][0]*cell,seg[2][1]*cell);ctx.lineTo(seg[3][0]*cell,seg[3][1]*cell);}}
+  }
+  ctx.stroke();ctx.globalAlpha=1;
+  // axes
+  ctx.strokeStyle=css("--line");ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,W);ctx.moveTo(0,W/2);ctx.lineTo(W,W/2);ctx.stroke();
+  // points
+  const r=Math.max(3.2,W/150);
+  for(const p of S.train){ctx.beginPath();ctx.arc(toPx(p.x),toPx(-p.y),r,0,7);ctx.fillStyle=`rgb(${(p.c?B:A).join()})`;ctx.fill();
+    ctx.lineWidth=1;ctx.strokeStyle="rgba(255,255,255,.85)";ctx.stroke();
+    if(S.added.includes(p)){ctx.beginPath();ctx.arc(toPx(p.x),toPx(-p.y),r+3,0,7);ctx.strokeStyle=css("--ink");ctx.lineWidth=1.2;ctx.stroke();}}
+  if($("#showTest").checked)for(const p of S.test){const px=toPx(p.x),py=toPx(-p.y),pred=prob(p.x,p.y)>=.5?1:0;
+    ctx.beginPath();ctx.arc(px,py,r+.6,0,7);ctx.fillStyle=css("--plot");ctx.fill();ctx.lineWidth=2.2;ctx.strokeStyle=`rgb(${(p.c?B:A).join()})`;ctx.stroke();
+    if(pred!==p.c){ctx.strokeStyle=css("--bad");ctx.lineWidth=2;const s=r+3;ctx.beginPath();ctx.moveTo(px-s,py-s);ctx.lineTo(px+s,py+s);ctx.moveTo(px+s,py-s);ctx.lineTo(px-s,py+s);ctx.stroke();}}
+}
+function drawLoss(){
+  const c=$("#loss"); if(!c||!c.clientWidth) return; const dpr=window.devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;
+  c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+  const L=S.losses;if(L.length<2){x.fillStyle=css("--muted");x.font="12px system-ui";x.fillText("Press Train to watch the loss fall",10,H/2+4);return;}
+  const max=Math.max(...L,0.7),min=0;x.strokeStyle=css("--accent");x.lineWidth=2;x.beginPath();
+  L.forEach((v,i)=>{const px=6+i/(L.length-1)*(W-12),py=H-6-(v-min)/(max-min)*(H-12);i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();
+  x.fillStyle=css("--muted");x.font="11px system-ui";x.fillText("loss "+L[L.length-1].toFixed(3),W-80,14);
+}
+
+/* ---------- metrics ---------- */
+function metrics(){
+  const acc=set=>set.length?set.filter(p=>(prob(p.x,p.y)>=.5?1:0)===p.c).length/set.length:0;
+  const tr=acc(S.train),te=acc(S.test);
+  let tp=0,fp=0,fn=0,tn=0;for(const p of S.test){const pr=prob(p.x,p.y)>=.5?1:0;if(pr&&p.c)tp++;else if(pr&&!p.c)fp++;else if(!pr&&p.c)fn++;else tn++;}
+  const pct=v=>Math.round(v*100)+"%";
+  $("#trainAcc").textContent=pct(tr);$("#testAcc").textContent=pct(te);
+  $("#prec").textContent=tp+fp?pct(tp/(tp+fp)):"–";$("#rec").textContent=tp+fn?pct(tp/(tp+fn)):"–";
+  $("#cm").innerHTML=`<div></div><div class="h">predicted A</div><div class="h">predicted B</div>
+    <div class="h" style="text-align:right">actual A</div><div class="tp"><b>${tn}</b>correct</div><div class="er"><b>${fp}</b>false B</div>
+    <div class="h" style="text-align:right">actual B</div><div class="er"><b>${fn}</b>missed B</div><div class="tp"><b>${tp}</b>correct</div>`;
+  const gap=tr-te,ins=$("#insight");ins.classList.remove("warn");
+  if(S.model==="logreg"&&S.epoch===0)ins.textContent="Weights are all zero, so every point gets 50%. Press Train to start gradient descent.";
+  else if(gap>.08){ins.classList.add("warn");ins.innerHTML=`<b>Overfitting alert:</b> train is ${pct(tr)} but test is only ${pct(te)}. The model learned noise in the training set. ${S.model==="knn"?"Try a larger k.":"Try linear features or fewer epochs."}`;}
+  else if(tr<.75&&S.model==="logreg"&&S.feat==="lin"&&(S.data==="circles"||S.data==="xor"||S.data==="moons"))
+    {ins.classList.add("warn");ins.innerHTML=`<b>Underfitting:</b> a straight line can't separate ${S.data}. Switch to polynomial features.`;}
+  else if(tr<.75){ins.classList.add("warn");ins.innerHTML=`<b>Underfitting:</b> both scores are low. ${S.model==="knn"?"Try a smaller k or less noise.":"Train longer or add features."}`;}
+  else ins.innerHTML=`<b>Generalising well:</b> train ${pct(tr)} vs test ${pct(te)}. A small gap means the model learned the pattern, not the noise.`;
+}
+function explain(){
+  const e=$("#explain");
+  e.innerHTML=S.model==="knn"
+   ?`<p><b>k-NN</b> doesn't learn weights. To classify a point it finds the <b>${S.k}</b> closest training points and takes a majority vote. <span class="cite">[scikit-learn]</span></p>
+     <p>Small k bends the boundary around single points (high variance). Large k smooths it out (high bias). This is the bias–variance trade-off. <span class="cite">[D2L]</span></p>
+     <p>In scikit-learn: <code>KNeighborsClassifier(n_neighbors=${S.k}).fit(X_train, y_train)</code></p>`
+   :`<p><b>Logistic regression</b> computes a weighted sum of the features and passes it through the sigmoid to get a probability. The boundary is where that probability is 0.5. <span class="cite">[ML Crash Course]</span></p>
+     <p>Training is <b>gradient descent</b> on log-loss: each epoch nudges the ${S.w.length} weights against the gradient, scaled by the learning rate (${S.lr.toFixed(2)}). <span class="cite">[D2L]</span></p>
+     <p>${S.feat==="lin"?"With only x and y the boundary is always a straight line.":"Adding x², xy, x³… lets a linear model draw curved boundaries: same algorithm, richer features."} <code>LogisticRegression().fit(X_train, y_train)</code></p>`;
+}
+function refresh(){draw();metrics();explain();drawLoss();$("#epochV").textContent="epoch "+S.epoch;}
+
+/* ---------- training animation ---------- */
+function train(epochs){
+  if(S.training) return; S.training=true; const btn=$("#trainBtn"); btn.textContent="Training…"; btn.disabled=true;
+  let done=0; (function frame(){for(let i=0;i<6&&done<epochs;i++,done++)gdStep(); refresh();
+    if(done<epochs)requestAnimationFrame(frame);else{S.training=false;btn.disabled=false;btn.textContent="▶ Train 300 epochs";}})();
+}
+
+/* ---------- wiring ---------- */
+function seg(id,key,cb){$(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  $(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));S[key]=key==="paint"?+b.dataset.v:b.dataset.v;cb&&cb();});}
+function rebuild(){makeData();if(S.model==="logreg"){resetWeights();refresh();train(300);}else refresh();}
+seg("#dataSeg","data",()=>{S.added=[];rebuild();});
+seg("#modelSeg","model",()=>{$("#knnCtl").classList.toggle("hidden",S.model!=="knn");$("#lrCtl").classList.toggle("hidden",S.model==="knn");
+  if(S.model==="logreg"){resetWeights();refresh();train(300);}else refresh();});
+seg("#featSeg","feat",()=>{resetWeights();refresh();train(300);});
+seg("#paintSeg","paint");
+const bind=(id,out,fmt,key,cb)=>{const el=$(id),o=$(out);const upd=()=>{S[key]=key==="lr"?Math.pow(10,+el.value):+el.value;o.textContent=fmt(S[key]);};upd();
+  el.addEventListener("input",()=>{upd();cb();});};
+bind("#noise","#noiseV",v=>v.toFixed(2),"noise",rebuild);
+bind("#npts","#nV",v=>v,"n",rebuild);
+bind("#testFrac","#testV",v=>Math.round(v*100)+"%","testFrac",rebuild);
+bind("#k","#kV",v=>v,"k",refresh);
+bind("#lr","#lrV",v=>v<.1?v.toFixed(3):v.toFixed(2),"lr",()=>{explain();});
+$("#resample").onclick=()=>{S.seed=Math.floor(Math.random()*1e6);rebuild();};
+$("#trainBtn").onclick=()=>train(300);
+$("#stepBtn").onclick=()=>{if(!S.training){gdStep();refresh();}};
+$("#resetW").onclick=()=>{if(!S.training){resetWeights();refresh();}};
+$("#showTest").onchange=draw; $("#showProb").onchange=draw;
+cv.addEventListener("click",e=>{const r=cv.getBoundingClientRect();
+  const x=((e.clientX-r.left)/r.width)*2-1,y=-(((e.clientY-r.top)/r.height)*2-1);
+  const p={x:clamp(x),y:clamp(y),c:S.paint};S.added.push(p);S.train.push(p);
+  if(S.model==="logreg"&&!S.training){train(100);}else refresh();});
+$("#undoBtn").onclick=()=>{const p=S.added.pop();if(!p)return;S.train.splice(S.train.indexOf(p),1);refresh();};
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{draw();drawLoss();},120);});
+
+makeData();resetWeights();applyTheme();refresh();
+</script>
+</body>
+</html>
