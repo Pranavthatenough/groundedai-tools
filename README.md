@@ -1,12 +1,12 @@
 # GroundedAI Tools
 
-Four interactive study tools built from my source-grounded notebooks: three for **machine learning** (from my GroundedAI notebook) and one for **data structures and algorithms** (from my DSA notebook). Each tool is a single HTML file, made with an AI agent without writing code by hand.
+Six interactive study tools built from my source-grounded notebooks: three for **machine learning** (from my GroundedAI notebook) and three for **data structures and algorithms** (from my DSA notebook). Each tool is a single HTML file, made with an AI agent without writing code by hand.
 
 **▶ Live demo:** https://pranavthatenough.github.io/groundedai-tools/
 
-**📓 Source notebooks:** ML: [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669). Everything in tools 1–3 is grounded in this notebook. DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53), the source for tool 4.
+**📓 Source notebooks:** ML: [GroundedAI notebook](https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669). Everything in tools 1–3 is grounded in this notebook. DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53), the source for tools 4–6.
 
-![Home page with the four tools](screenshots/home.png)
+![Home page with the six tools](screenshots/home.png)
 
 ## The tools
 
@@ -55,10 +55,32 @@ A complete DSA revision and practice tool for college exams and coding interview
 
 ![DSA study hub](screenshots/dsa-hub.png)
 
+### 5. Data Structure Playground (interactive data structures)
+The DSA version of the Classification Playground: work with real data structures and watch every step.
+
+- **6 structures:** stack, queue, binary search tree, min-heap, hash table and graph
+- **Animated operations:** push/pop, enqueue/dequeue, insert/search/delete, extract-min, and BFS/DFS from any start node
+- **BST:** inorder, preorder, postorder and level-order traversals, and an **"unbalanced" alert** when sorted inserts turn the tree into a chain
+- **Heap:** drawn as a tree *and* as the array it is stored in; extracting repeatedly gives heap sort
+- **Hash table:** change the number of buckets (rehashing), watch the load factor, and simulate the worst case where every key collides
+- A **step counter** for every operation, next to its Big-O cost, so you see O(1), O(log n) and O(n) happen
+
+![Data structure playground](screenshots/ds-playground.png)
+
+### 6. DSA Answer Lab
+The DSA version of the Grounded Answer Lab.
+
+- Ask a DSA question. The grounded assistant answers **only** from passages summarising my DSA notebook's sources, with clickable **[1] [2]** citations.
+- It says **"Not in my sources"** for off-topic questions (e.g. Codeforces ratings, the FIFA World Cup).
+- A simulated memory-only chatbot makes classic DSA mistakes (quick sort is "always" O(n log n), stack and queue swapped, BSTs "rebalance themselves"); **Spot the problems** reveals them.
+- Switch sources on and off, change top-k and the relevance threshold.
+
+![DSA answer lab](screenshots/dsa-answer-lab.png)
+
 ## Run it
 
 - **Online:** open the live demo link above.
-- **Offline:** download the repo (*Code → Download ZIP*), unzip, and double-click `index.html` or any of the four tool files. No install and no internet needed.
+- **Offline:** download the repo (*Code → Download ZIP*), unzip, and double-click `index.html` or any of the six tool files. No install and no internet needed.
 
 Works on a laptop or a phone.
 
@@ -73,9 +95,9 @@ Works on a laptop or a phone.
 5. PyTorch tutorials
 6. My own GroundedAI notes
 
-The Answer Lab's passages are my own short summaries of these sources, not copied text.
+Both Answer Labs' passages are my own short summaries of my notebook sources, not copied text.
 
-**DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53)** (tool 4)
+**DSA: [DSA for College & Placements](https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53)** (tools 4–6)
 
 1. [Open Data Structures](https://opendatastructures.org/), Pat Morin (free textbook)
 2. [MIT 6.006 Introduction to Algorithms](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/), lecture notes
@@ -86,7 +108,7 @@ The Answer Lab's passages are my own short summaries of these sources, not copie
 
 ## How it was built
 
-- **Agent:** Claude, prompted with the 4-part format from the brief: *who* it's for, *what* it is, what it should *do*, and the *rules*.
+- **Agent:** Claude, prompted with a 4-part format: *who* it's for, *what* it is, what it should *do*, and the *rules*.
 - **Rules for every page:** a single HTML file, no internet needed, works on a phone, at least 5 interactive controls, facts must match the sources.
 - **Testing:** every control was clicked in a headless browser at laptop and phone sizes, then 5 fix rounds were run on what broke. Example: the Answer Lab answered an off-topic ResNet question from a general passage, so a "gap check" was added to refuse it.
 
@@ -100,6 +122,8 @@ index.html                          home page: a Live demo button for each tool 
 2-classification-playground.html    tool 2
 3-grounded-answer-lab.html          tool 3
 4-dsa-study-hub.html                tool 4
+5-data-structure-playground.html    tool 5
+6-dsa-answer-lab.html               tool 6
 prompts.md                          every prompt, in order, plus fix rounds
 screenshots/                        images used in this README
 ```

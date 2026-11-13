@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSA Answer Lab · GroundedAI</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#fff; --surface-2:#f0ede6; --ink:#1b1b1f; --muted:#62626b; --line:#e2ded5;
+  --accent:#3b4cca; --accent-soft:#e6e8fb; --good:#1f8a57; --good-soft:#dff3e8; --bad:#c0392b; --bad-soft:#fbe4e1;
+  --warn:#8a5600; --warn-soft:#fff2d9; --mark:#ffe58a; --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05);
+}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab; --line:#2e313a;
+  --accent:#8b97ff; --accent-soft:#272b4a; --good:#4cc38a; --good-soft:#1b3328; --bad:#ff7a6b; --bad-soft:#3a2120;
+  --warn:#f0c070; --warn-soft:#3a2f17; --mark:#6b5a12; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+header small{display:block;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+header h1{margin:2px 0 0;font-size:clamp(22px,4vw,30px);letter-spacing:-.02em}
+header h1 span{color:var(--accent)}
+header p{margin:4px 0 0;color:var(--muted);max-width:680px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;transition:.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{color:#fff;filter:brightness(1.08)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ask{display:flex;gap:8px;flex-wrap:wrap}
+.ask input{flex:1;min-width:200px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:15px}
+.ask input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:12.5px;text-align:left}
+.chip:hover{border-color:var(--accent)}
+.chip.off{border-style:dashed}
+.pipe{display:flex;align-items:center;gap:6px;margin-top:14px;font-size:12.5px;flex-wrap:wrap}
+.pipe span{padding:5px 10px;border-radius:8px;background:var(--surface-2);color:var(--muted);transition:.25s}
+.pipe span.on{background:var(--accent);color:#fff}
+.pipe i{color:var(--muted);font-style:normal}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;margin-top:16px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface-2);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.answers{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin-top:12px}
+.answers.one{grid-template-columns:1fr}
+@media(max-width:700px){.answers{grid-template-columns:1fr}}
+.ans{border-radius:12px;border:1px solid var(--line);padding:14px;position:relative}
+.ans.g{border-top:4px solid var(--good)}
+.ans.m{border-top:4px solid var(--bad)}
+.ans h3{margin:0 0 2px;font-size:14px}
+.ans .tag{font-size:12px;color:var(--muted);margin-bottom:10px}
+.ans p{margin:0 0 8px}
+.ans .refuse{background:var(--warn-soft);color:var(--warn);padding:10px 12px;border-radius:10px;font-size:14px}
+.c{display:inline-block;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:0;border-radius:5px;padding:0 6px;margin:0 1px;vertical-align:1px}
+.c:hover,.c.act{background:var(--accent);color:#fff}
+.trust{margin-top:12px;font-size:12.5px;color:var(--muted)}
+.meter{height:6px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;transition:width .4s}
+.wrong{background:var(--bad-soft);border-bottom:2px solid var(--bad);border-radius:3px;padding:0 2px}
+.fixes{margin:10px 0 0;padding:10px 12px 10px 28px;border-radius:10px;background:var(--surface-2);font-size:13.5px;display:none}
+.fixes.show{display:block}
+.fixes li{margin-bottom:6px}
+.ctl{margin-bottom:16px}
+.ctl:last-child{margin-bottom:0}
+.ctl .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px}
+.ctl .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ctl .help{font-size:12px;color:var(--muted);margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.src{display:flex;gap:9px;align-items:flex-start;padding:6px 4px;font-size:13px;cursor:pointer;border-radius:8px}
+.src:hover{background:var(--surface-2)}
+.src input{accent-color:var(--accent);width:16px;height:16px;margin-top:2px;flex:none}
+.src small{display:block;color:var(--muted)}
+.sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
+.sw input{accent-color:var(--accent);width:16px;height:16px}
+.ev{display:grid;gap:8px}
+.pas{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;transition:.25s;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}
+.pas .num{grid-row:span 2;font-weight:700;color:var(--muted);min-width:26px}
+.pas.used{border-color:var(--good)}
+.pas.used .num{color:var(--good)}
+.pas.dim{opacity:.45}
+.pas.flash{box-shadow:0 0 0 3px var(--accent);border-color:var(--accent)}
+.pas .meta{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.pas .bar{flex:1;min-width:60px;max-width:140px;height:5px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.pas .bar i{display:block;height:100%;background:var(--accent)}
+.pas .why{font-size:11.5px;padding:1px 7px;border-radius:999px;background:var(--surface-2)}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.empty{color:var(--muted);text-align:center;padding:18px;font-size:14px}
+.legend{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin:14px 0 0 max(16px,env(safe-area-inset-left,0px));padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font:13px system-ui,sans-serif">← All projects</a>
+<div class="wrap">
+<header>
+  <div>
+    <small>DSA · Grounded answers</small>
+    <h1>DSA Answer <span>Lab</span></h1>
+    <p>Ask a DSA question and watch a source-grounded assistant find evidence in my DSA notebook, cite every claim, and refuse when the sources don't cover it, next to a chatbot answering from memory.</p>
+  </div>
+  <button class="btn" id="themeBtn">◐ Theme</button>
+</header>
+
+<section class="card">
+  <form class="ask" id="askForm">
+    <input id="q" type="search" autocomplete="off" placeholder="Ask about arrays, trees, graphs, sorting, hashing, DP…" aria-label="Your question">
+    <button class="btn primary" type="submit">Ask →</button>
+  </form>
+  <div class="presets" id="presets"></div>
+  <div class="pipe" aria-hidden="true">
+    <span data-s="0">① Question</span><i>→</i><span data-s="1">② Retrieve from enabled sources</span><i>→</i><span data-s="2">③ Rank & apply threshold</span><i>→</i><span data-s="3">④ Answer with citations</span>
+  </div>
+</section>
+
+<div class="layout">
+  <div>
+    <section class="card">
+      <h2>Answers
+        <span class="seg" id="modeSeg" style="margin-left:auto">
+          <button data-v="compare" aria-pressed="true">Compare</button>
+          <button data-v="g" aria-pressed="false">Grounded only</button>
+          <button data-v="m" aria-pressed="false">Memory only</button>
+        </span>
+      </h2>
+      <div class="answers" id="answers"><div class="empty" style="grid-column:1/-1">Pick a question above or type your own.</div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Evidence <span style="font-weight:400;color:var(--muted);font-size:13px" id="evCount"></span></h2>
+      <div class="legend">Every passage in the notebook, ranked by how well it matches your question. <b style="color:var(--good)">Green</b> = used in the answer. Faded = below threshold or source switched off. Click a citation in the answer to jump here.</div>
+      <div class="ev" id="ev"></div>
+    </section>
+  </div>
+
+  <aside class="card">
+    <h2>Notebook controls</h2>
+    <div class="ctl">
+      <div class="row"><span>Sources (switch off to see answers change)</span></div>
+      <div id="srcList"></div>
+    </div>
+    <div class="ctl">
+      <div class="row"><span>Passages to use (top-k)</span><b id="kV"></b></div>
+      <input type="range" id="k" min="1" max="5" value="3">
+    </div>
+    <div class="ctl">
+      <div class="row"><span>Relevance threshold</span><b id="thV"></b></div>
+      <input type="range" id="th" min="0.02" max="0.5" step="0.01" value="0.12">
+      <div class="help">Below this score a passage doesn't count as evidence. Raise it to make the assistant stricter about saying “not in my sources”.</div>
+    </div>
+    <div class="ctl">
+      <label class="sw"><input type="checkbox" id="hl" checked> Highlight matched words</label>
+    </div>
+    <div class="ctl"><button class="btn" id="resetBtn" style="width:100%">↺ Reset controls</button></div>
+  </aside>
+</div>
+<footer>Passages are my own short summaries of the sources in my DSA notebook. The “memory” answers are simulated and contain deliberate errors for comparison.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let theme=null;try{theme=localStorage.getItem("gai-theme")}catch(e){}
+function applyTheme(){document.documentElement.dataset.theme=theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+$("#themeBtn").onclick=()=>{theme=document.documentElement.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("gai-theme",theme)}catch(e){};applyTheme();};
+applyTheme();
+
+const SOURCES=[
+  {id:1,t:"Open Data Structures",d:"Pat Morin, free textbook"},
+  {id:2,t:"MIT 6.006 lecture notes",d:"Introduction to Algorithms"},
+  {id:3,t:"Algorithms (Jeff Erickson)",d:"DP and greedy chapters"},
+  {id:4,t:"Tech Interview Handbook",d:"Topic cheat sheets"},
+  {id:5,t:"Big-O Cheat Sheet",d:"Interview Cake"},
+  {id:6,t:"My DSA notes",d:"My notebook notes"}
+];
+const P=[
+  [1,"An array stores its elements in one contiguous block of memory, so reading any index takes O(1) time, but inserting or deleting in the middle shifts the later elements and takes O(n)."],
+  [1,"A dynamic array, such as a Python list or Java ArrayList, doubles its capacity when it is full. Copying happens rarely, so appending costs O(1) amortised."],
+  [1,"A linked list stores each element in a node that points to the next node. Inserting or removing next to a node you already hold is O(1), but reaching the i-th element means walking i nodes, which is O(n)."],
+  [1,"A binary search tree keeps smaller keys in the left subtree and larger keys in the right subtree, so search, insert and delete take time proportional to the tree's height."],
+  [1,"If keys are inserted into a plain binary search tree in sorted order, the tree degenerates into a chain of height n and its operations become O(n). Balanced trees such as AVL and red-black trees keep the height O(log n)."],
+  [1,"A binary heap is a complete binary tree stored in an array where every parent is no larger than its children. Insert and remove-min take O(log n), and reading the minimum takes O(1)."],
+  [1,"Hashing with chaining puts each key in a list at bucket hash(key). With a good hash function and a small load factor, find, insert and delete take O(1) expected time."],
+  [2,"Binary search works on a sorted array: it compares the target with the middle element and discards half of the range each step, so it needs O(log n) comparisons."],
+  [2,"Merge sort splits the array in half, sorts each half recursively and merges the sorted halves, taking O(n log n) time in every case and O(n) extra space."],
+  [2,"Any sorting algorithm that only compares pairs of elements needs Ω(n log n) comparisons in the worst case, so merge sort is an asymptotically optimal comparison sort."],
+  [2,"Breadth-first search explores a graph level by level using a queue and finds shortest paths in an unweighted graph. It runs in O(V + E) time."],
+  [2,"Depth-first search follows one path as deep as possible before backtracking, using recursion or a stack. It runs in O(V + E) time and is used for topological sort and cycle detection."],
+  [2,"Dijkstra's algorithm finds shortest paths from one source when every edge weight is non-negative. With a binary heap it runs in O((V + E) log V)."],
+  [3,"Dynamic programming solves a problem by splitting it into overlapping subproblems, solving each subproblem once and storing its answer in a table (memoization) instead of recomputing it."],
+  [3,"A naive recursive Fibonacci takes exponential time because it recomputes the same values again and again; storing each result makes it O(n)."],
+  [3,"A greedy algorithm makes the locally best choice at each step. It is correct only when you can prove the greedy choice never hurts, for example with an exchange argument."],
+  [4,"The two pointers technique moves two indices through a sorted array, often from both ends, which turns many O(n²) pair searches into O(n)."],
+  [4,"The sliding window technique keeps a contiguous window and moves its edges, so many subarray and substring problems can be solved in O(n)."],
+  [4,"In a coding interview, first clarify the problem and its edge cases, then state a brute-force solution, then optimise it and analyse its time and space complexity."],
+  [5,"Quick sort runs in O(n log n) time on average but O(n²) in the worst case, for example when the pivot is always the smallest or largest element."],
+  [5,"A hash table has O(1) average-case lookup, insert and delete, but O(n) in the worst case when many keys collide into the same bucket."],
+  [5,"Big-O notation describes how running time grows with input size. It drops constants and lower-order terms, so 3n² + 5n + 2 is O(n²)."],
+  [6,"A stack is last-in, first-out (LIFO): push and pop happen at the top in O(1). A queue is first-in, first-out (FIFO): enqueue at the back and dequeue at the front, both O(1)."],
+  [6,"Choose a data structure by its most frequent operation: a hash map for fast lookup by key, a heap for the repeated minimum or maximum, a queue for BFS, and a stack for undo or matching brackets."]
+].map(([s,t],i)=>({id:i,s,t}));
+
+const PRESETS=[
+  {q:"What is the time complexity of quick sort?",
+   mem:["Quick sort always runs in <x>O(n log n), even in the worst case</x>.","That is why it is <x>guaranteed to be faster than merge sort</x> on every input."],
+   fix:["Quick sort's worst case is O(n²), e.g. when the pivot is always the smallest or largest element. Only its average case is O(n log n).","Nothing guarantees that; merge sort is O(n log n) in every case."]},
+  {q:"How does binary search work and how fast is it?",
+   mem:["Binary search checks the middle element and halves the range, so it takes <x>O(n/2)</x> time.","It works on <x>any array, sorted or not</x>."],
+   fix:["Halving the range each step gives O(log n), not O(n/2). And O(n/2) is just O(n).","The array must be sorted, or discarding half the range is wrong."]},
+  {q:"What is the difference between a stack and a queue?",
+   mem:["A stack is <x>first-in, first-out</x> and a queue is <x>last-in, first-out</x>.","That's why <x>BFS uses a stack</x>."],
+   fix:["Swapped: a stack is LIFO and a queue is FIFO.","BFS uses a queue; DFS uses a stack."]},
+  {q:"Why is hash table lookup O(1)?",
+   mem:["Hash table lookup is O(1) <x>in every case, including the worst case</x>,","because <x>collisions are impossible with a good hash function</x>."],
+   fix:["O(1) is the average case. The worst case is O(n), when many keys collide.","Collisions can always happen when there are more possible keys than buckets; chaining handles them."]},
+  {q:"What is dynamic programming?",
+   mem:["Dynamic programming is <x>an algorithm invented by Dijkstra in 1972</x>","that <x>tries every possible answer and keeps the best one</x>."],
+   fix:["That attribution isn't in any of my sources: an invented fact stated confidently.","Trying everything is brute force. DP solves overlapping subproblems once and stores their answers."]},
+  {q:"What happens when you insert sorted keys into a binary search tree?",
+   mem:["A binary search tree <x>automatically rebalances itself</x>, so its height <x>always stays log n</x>."],
+   fix:["A plain BST does not rebalance. Sorted inserts make a chain of height n, so operations become O(n). Only balanced trees (AVL, red-black) keep O(log n)."]},
+  {q:"What Codeforces rating do I need to get placed?",off:true,
+   mem:["You need a rating of <x>exactly 1600</x>, and <x>every company checks it</x>."],
+   fix:["None of my sources talk about Codeforces ratings or company rules. A confident number with no source is exactly what grounding prevents."]},
+  {q:"Who won the 2022 FIFA World Cup?",off:true,
+   mem:["Argentina won the 2022 FIFA World Cup."],
+   fix:["This may well be true, but it is outside my DSA notebook, so it can't be checked against my sources. A grounded assistant should say so."]}
+];
+
+/* ---------- tiny TF-IDF retriever ---------- */
+const STOP=new Set("a an the is are was were be been of to in on for and or with by as at it its this that these those from how what why does do did which who whom when where can i my me you your we our into than then so such not no only also very more most use used using about there their they them he she his her will would should could has have had o n".split(" "));
+const WEAK=new Set("explain tell give many much difference between mean meaning work happen way good best get make fix fast faster need".split(" "));
+const SYN={quicksort:"quick",mergesort:"merge",bst:"binary",bfs:"breadth",dfs:"depth",dp:"dynamic",hashmap:"hash",hashing:"hash",hashtable:"hash",dictionary:"hash",dict:"hash",
+  lifo:"stack",fifo:"queue",stacks:"stack",queues:"queue",trees:"tree",graphs:"graph",arrays:"array",lists:"list",heaps:"heap",
+  memoisation:"memoization",memoize:"memoization",memo:"memoization",complexity:"time",runtime:"time",lookups:"lookup",search:"search",searching:"search",
+  sorted:"sort",sorting:"sort",sorts:"sort",inserted:"insert",insertion:"insert",inserting:"insert",keys:"key",collisions:"collide",collision:"collide",
+  pointer:"pointers",window:"window",recursion:"recursive",recursively:"recursive",fibonacci:"fibonacci",shortest:"shortest",paths:"path",
+  rebalance:"balanced",balance:"balanced",rebalancing:"balanced",greedily:"greedy",interviews:"interview",pivot:"pivot",subproblem:"subproblems"};
+function stem(w){w=SYN[w]||w;if(w.length>5&&w.endsWith("ing"))w=w.slice(0,-3);else if(w.length>4&&/(ch|sh|x|z)es$/.test(w))w=w.slice(0,-2);else if(w.length>3&&w.endsWith("s")&&!w.endsWith("ss"))w=w.slice(0,-1);return SYN[w]||w;}
+const tok=t=>t.toLowerCase().replace(/[^a-z0-9√ₖ\s.]/g," ").replace(/\./g," ").split(/\s+/).filter(w=>w&&!STOP.has(w)).map(stem);
+const DOCS=P.map(p=>{const t=tok(p.t),tf={};t.forEach(w=>tf[w]=(tf[w]||0)+1);return{tf};});
+const DF={};DOCS.forEach(d=>Object.keys(d.tf).forEach(w=>DF[w]=(DF[w]||0)+1));
+const idf=w=>Math.log((P.length+1)/((DF[w]||0)+1))+1;
+const vec=tf=>{const v={};let n=0;for(const w in tf){v[w]=(1+Math.log(tf[w]))*idf(w);n+=v[w]**2;}n=Math.sqrt(n)||1;for(const w in v)v[w]/=n;return v;};
+DOCS.forEach(d=>d.v=vec(d.tf));
+function retrieve(q){
+  const qt=tok(q),tf={};qt.forEach(w=>tf[w]=(tf[w]||0)+1);const qv=vec(tf);
+  return P.map((p,i)=>{let s=0,hit=[];for(const w in qv)if(DOCS[i].v[w]){s+=qv[w]*DOCS[i].v[w];hit.push(w);}return{p,score:s,hit};})
+          .sort((a,b)=>b.score-a.score);
+}
+
+/* ---------- state ---------- */
+const S={q:"",preset:null,mode:"compare",k:3,th:.12,on:new Set(SOURCES.map(s=>s.id)),showFix:false};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- UI build ---------- */
+$("#presets").innerHTML=PRESETS.map((p,i)=>`<button class="chip ${p.off?"off":""}" data-i="${i}">${p.off?"🚫 ":""}${esc(p.q)}</button>`).join("");
+$("#srcList").innerHTML=SOURCES.map(s=>`<label class="src"><input type="checkbox" data-id="${s.id}" checked><span><b>[${s.id}]</b> ${esc(s.t)}<small>${esc(s.d)} · ${P.filter(p=>p.s===s.id).length} passages</small></span></label>`).join("");
+
+$("#presets").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;S.preset=+b.dataset.i;S.q=PRESETS[S.preset].q;$("#q").value=S.q;S.showFix=false;run(true);};
+$("#askForm").onsubmit=e=>{e.preventDefault();S.q=$("#q").value.trim();S.preset=PRESETS.findIndex(p=>p.q.toLowerCase()===S.q.toLowerCase());if(S.preset<0)S.preset=null;S.showFix=false;run(true);};
+$("#modeSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;S.mode=b.dataset.v;$("#modeSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));run();};
+$("#srcList").onchange=e=>{const id=+e.target.dataset.id;e.target.checked?S.on.add(id):S.on.delete(id);run();};
+const kEl=$("#k"),thEl=$("#th");
+kEl.oninput=()=>{S.k=+kEl.value;$("#kV").textContent=S.k;run();};
+thEl.oninput=()=>{S.th=+thEl.value;$("#thV").textContent=S.th.toFixed(2);run();};
+$("#hl").onchange=()=>run();
+$("#resetBtn").onclick=()=>{S.k=3;S.th=.12;S.on=new Set(SOURCES.map(s=>s.id));kEl.value=3;thEl.value=.12;$("#kV").textContent="3";$("#thV").textContent="0.12";
+  document.querySelectorAll("#srcList input").forEach(i=>i.checked=true);$("#hl").checked=true;run();};
+$("#kV").textContent=S.k;$("#thV").textContent=S.th.toFixed(2);
+
+/* ---------- pipeline animation ---------- */
+let pipeTimer=[];
+function animatePipe(){pipeTimer.forEach(clearTimeout);const st=document.querySelectorAll(".pipe span");st.forEach(s=>s.classList.remove("on"));
+  st.forEach((s,i)=>pipeTimer.push(setTimeout(()=>{st.forEach(x=>x.classList.remove("on"));s.classList.add("on");},i*220)));}
+
+/* ---------- render ---------- */
+function highlight(text,hit){
+  if(!$("#hl").checked||!hit.length)return esc(text);
+  return esc(text).replace(/[A-Za-z0-9√ₖ]+/g,w=>{const s=stem(w.toLowerCase());return hit.includes(s)&&!STOP.has(w.toLowerCase())?`<mark>${w}</mark>`:w;});
+}
+function run(anim){
+  if(anim)animatePipe();
+  if(!S.q){renderEvidence([]);return;}
+  const ranked=retrieve(S.q);
+  const avail=ranked.filter(r=>S.on.has(r.p.s));
+  // gap check: key words in the question that appear nowhere in the notebook
+  const terms=[...new Set(tok(S.q))].filter(w=>!WEAK.has(w)), gap=terms.filter(w=>!DF[w]);
+  S.gap=gap.length>=2?gap:[];
+  const notCovered=gap.length>=2&&gap.length/terms.length>=.4;
+  const used=notCovered?[]:avail.filter(r=>r.score>=S.th).slice(0,S.k);
+  const usedIds=used.map(r=>r.p.id);
+  S.notCovered=notCovered;
+  renderAnswers(used);
+  renderEvidence(ranked,usedIds);
+}
+function renderAnswers(used){
+  const box=$("#answers"),pr=S.preset!=null?PRESETS[S.preset]:null;
+  box.className="answers"+(S.mode==="compare"?"":" one");
+  let g="",m="";
+  if(S.mode!=="m"){
+    if(!used.length){
+      const off=S.on.size<SOURCES.length;
+      g=`<div class="ans g"><h3>✅ Grounded assistant</h3><div class="tag">Answers only from your enabled sources</div>
+        <div class="refuse"><b>Not in my sources.</b> ${S.notCovered
+          ?`Some passages share general words with your question, but my sources say nothing about <b>${S.gap.map(esc).join(", ")}</b>. I won't stretch them into an answer.`
+          :`None of the enabled passages scored above the ${S.th.toFixed(2)} relevance threshold, so I won't guess.${off?" Some sources are switched off — try turning them back on.":" Try lowering the threshold, or add a source that covers this."}`}</div>
+        ${trust(0,0,true)}</div>`;
+    }else{
+      const body=used.map((r,i)=>`<p>${esc(r.p.t)} <button class="c" data-p="${r.p.id}" title="${esc(SOURCES[r.p.s-1].t)}">[${i+1}]</button></p>`).join("");
+      const srcs=[...new Set(used.map(r=>r.p.s))].map(s=>SOURCES[s-1].t).join(" · ");
+      const gapNote=S.gap.length?`<div class="refuse" style="margin-bottom:10px;font-size:13px"><b>Gap:</b> my sources don't mention ${S.gap.map(esc).join(", ")}, so this answer covers only the parts they do.</div>`:"";
+      g=`<div class="ans g"><h3>✅ Grounded assistant</h3><div class="tag">From ${used.length} passage${used.length>1?"s":""}: ${esc(srcs)}</div>${gapNote}${body}${trust(used.length,used.length)}</div>`;
+    }
+  }
+  if(S.mode!=="g"){
+    if(pr){
+      const mk=s=>s.replace(/<x>(.*?)<\/x>/g,(_,t)=>S.showFix?`<span class="wrong">${t}</span>`:t);
+      const nWrong=pr.mem.join("").split("<x>").length-1;
+      m=`<div class="ans m"><h3>⚠️ Chatbot from memory <span style="font-weight:400;color:var(--muted)">(simulated)</span></h3><div class="tag">No sources, no citations, sounds just as sure</div>
+        ${pr.mem.map(s=>`<p>${mk(s)}</p>`).join("")}
+        <button class="btn" id="spot" style="padding:5px 12px;font-size:13px">${S.showFix?"Hide":"🔍 Spot the"} ${nWrong?"problems":"problem"}</button>
+        <ol class="fixes ${S.showFix?"show":""}">${pr.fix.map(f=>`<li>${esc(f)}</li>`).join("")}</ol>
+        ${trust(0,pr.mem.length)}</div>`;
+    }else{
+      m=`<div class="ans m"><h3>⚠️ Chatbot from memory <span style="font-weight:400;color:var(--muted)">(simulated)</span></h3><div class="tag">No sources, no citations</div>
+        <p>A memory-only chatbot would give a fluent, confident answer here. It might be right or wrong — but nothing in it points to a source you can open and check.</p>
+        <p style="color:var(--muted);font-size:13px">Tip: the preset questions include real examples of the kinds of mistakes memory-only answers make.</p>${trust(0,1)}</div>`;
+    }
+  }
+  box.innerHTML=g+m;
+  const sp=$("#spot");if(sp)sp.onclick=()=>{S.showFix=!S.showFix;renderAnswers(used);};
+}
+function trust(cited,total,refused){
+  if(refused)return `<div class="trust">Verifiable claims: <b>0 made, 0 invented</b> — refusing is the honest answer.<div class="meter"><i style="width:100%;background:var(--warn)"></i></div></div>`;
+  const pct=total?Math.round(cited/total*100):0;
+  return `<div class="trust">Claims with a citation: <b>${cited}/${total} (${pct}%)</b><div class="meter"><i style="width:${pct}%;background:${pct>=100?"var(--good)":"var(--bad)"}"></i></div></div>`;
+}
+function renderEvidence(ranked,usedIds=[]){
+  const ev=$("#ev");
+  if(!ranked.length){ev.innerHTML=`<div class="empty">Ask something to see which passages match.</div>`;$("#evCount").textContent=`· ${P.length} passages in the notebook`;return;}
+  const max=Math.max(ranked[0].score,.01);
+  $("#evCount").textContent=`· ${usedIds.length} used of ${P.length}`;
+  const shown=S.allEv?ranked:ranked.slice(0,6);
+  ev.innerHTML=shown.map((r,i)=>{
+    const used=usedIds.indexOf(r.p.id), off=!S.on.has(r.p.s), low=r.score<S.th;
+    const why=used>=0?`cited as [${used+1}]`:off?"source off":low?"below threshold":"not in top-k";
+    return `<div class="pas ${used>=0?"used":"dim"}" id="pas-${r.p.id}"><span class="num">#${i+1}</span>
+      <div>${highlight(r.p.t,r.hit)}</div>
+      <div class="meta"><span>[${r.p.s}] ${esc(SOURCES[r.p.s-1].t)}</span><span class="bar"><i style="width:${r.score/max*100}%"></i></span><span>score ${r.score.toFixed(2)}</span><span class="why">${why}</span></div></div>`;
+  }).join("")+`<button class="btn" id="moreEv" style="justify-self:center">${S.allEv?"Show top 6 only":`Show all ${P.length} passages`}</button>`;
+  $("#moreEv").onclick=()=>{S.allEv=!S.allEv;run();};
+}
+document.addEventListener("click",e=>{const c=e.target.closest(".c");if(!c)return;
+  let el=$("#pas-"+c.dataset.p);
+  if(!el){S.allEv=true;run();el=$("#pas-"+c.dataset.p);}
+  document.querySelectorAll(".c").forEach(x=>x.classList.toggle("act",x.dataset.p===c.dataset.p));el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1600);});
+
+/* start with an example */
+S.preset=0;S.q=PRESETS[0].q;$("#q").value=S.q;run(true);
+</script>
+</body>
+</html>

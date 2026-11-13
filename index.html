@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GroundedAI Tools</title>
-<meta name="description" content="Four interactive study tools built from my GroundedAI notebooks: an ML revision dashboard, a classification playground, a grounded answer lab and a DSA study hub.">
+<meta name="description" content="Six interactive study tools built from my GroundedAI notebooks: three for machine learning and three for data structures and algorithms.">
 <style>
 /* Layout: one narrow column — intro, then stacked tool rows, each with its demo button on the right (stacks on phone). */
 :root{
@@ -58,8 +58,8 @@ h1 em{font-style:normal;color:var(--accent)}
 <body>
 <div class="wrap">
   <header class="intro">
-    <div class="eyebrow">BSERC GenAI Internship · Week 1 · Project 2</div>
-    <h1>GroundedAI, turned into <em>four tools you can click</em></h1>
+    <div class="eyebrow">Source-grounded study tools · ML &amp; DSA</div>
+    <h1>GroundedAI, turned into <em>six tools you can click</em></h1>
     <p>Each tool is a single HTML page built with AI from my source-grounded notebooks on <a href="https://notebook.google.com/notebook/c8a75025-8605-4f81-aba1-88c6b47f8669" target="_blank" rel="noopener" style="color:var(--accent)">machine learning</a> and <a href="https://notebook.google.com/notebook/98f130de-72b3-40ac-baf9-5136ce1efd53" target="_blank" rel="noopener" style="color:var(--accent)">DSA</a>, without writing code by hand. They work on a laptop or a phone. Open any one with its Live demo button.</p>
   </header>
 
@@ -103,13 +103,33 @@ h1 em{font-style:normal;color:var(--accent)}
       </div>
       <a class="demo" href="4-dsa-study-hub.html">Live demo →</a>
     </article>
+
+    <article class="tool">
+      <div>
+        <div class="opt">Interactive data structures</div>
+        <h2>Data Structure Playground</h2>
+        <p>Push, pop, insert, delete and search on a stack, queue, BST, heap and hash table, and run BFS and DFS on a graph. Every step is animated and counted, so you see when O(log n) turns into O(n).</p>
+        <div class="tags"><span>6 structures</span><span>Step-by-step animation</span><span>Step counter</span><span>Unbalanced-tree alert</span><span>Hash collisions</span></div>
+      </div>
+      <a class="demo" href="5-data-structure-playground.html">Live demo →</a>
+    </article>
+
+    <article class="tool">
+      <div>
+        <div class="opt">Grounded answers for DSA</div>
+        <h2>DSA Answer Lab</h2>
+        <p>Ask a DSA question. A grounded assistant answers only from my DSA notebook with clickable citations and refuses off-topic questions, next to a memory-only chatbot with mistakes to spot.</p>
+        <div class="tags"><span>Citations [1]</span><span>Source on/off</span><span>Relevance threshold</span><span>Spot the errors</span><span>Evidence ranking</span></div>
+      </div>
+      <a class="demo" href="6-dsa-answer-lab.html">Live demo →</a>
+    </article>
   </section>
 
   <section class="tools" aria-label="Source notebooks">
     <h2 class="sec-h">The notebooks behind them</h2>
     <article class="tool nb">
       <div>
-        <div class="opt">Project 1 · Source for tools 1–3</div>
+        <div class="opt">Source for tools 1–3</div>
         <h2>GroundedAI notebook</h2>
         <p>A source-grounded study assistant for machine learning. It answers only from its ML references and cites every claim.</p>
         <div class="tags"><span>Source-grounded</span><span>Cited answers</span><span>ML &amp; deep learning</span></div>
@@ -119,7 +139,7 @@ h1 em{font-style:normal;color:var(--accent)}
 
     <article class="tool nb">
       <div>
-        <div class="opt">Source for tool 4</div>
+        <div class="opt">Source for tools 4–6</div>
         <h2>DSA for College &amp; Placements</h2>
         <p>A source-grounded notebook for data structures and algorithms, built on textbooks, MIT lecture notes and interview cheat sheets.</p>
         <div class="tags"><span>20+ sources</span><span>College syllabus</span><span>Interview prep</span></div>

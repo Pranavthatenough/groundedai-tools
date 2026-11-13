@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Structure Playground · GroundedAI</title>
+<style>
+:root{
+  --bg:#f6f4ef; --surface:#fff; --surface-2:#f0ede6; --ink:#1b1b1f; --muted:#62626b; --line:#e2ded5;
+  --accent:#3b4cca; --accent-soft:#e6e8fb; --good:#1f8a57; --good-soft:#dff3e8; --bad:#c0392b; --bad-soft:#fbe4e1;
+  --warn-soft:#fff2d9; --warn:#8a5600; --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05); --plot:#fbfaf7;
+}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --surface-2:#23262e; --ink:#ececf1; --muted:#9a9cab; --line:#2e313a;
+  --accent:#8b97ff; --accent-soft:#272b4a; --good:#4cc38a; --good-soft:#1b3328; --bad:#ff7a6b; --bad-soft:#3a2120;
+  --warn-soft:#3a2f17; --warn:#f0c070; --shadow:none; --plot:#16181d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+header small{display:block;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+header h1{margin:2px 0 0;font-size:clamp(22px,4vw,30px);letter-spacing:-.02em}
+header h1 span{color:var(--accent)}
+header p{margin:4px 0 0;color:var(--muted);max-width:660px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;transition:.15s}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.primary:hover:not(:disabled){color:var(--surface);filter:brightness(1.08)}
+.layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:-.01em}
+#stage{width:100%;display:block;border-radius:10px;background:var(--plot);min-height:220px;max-height:460px}
+.msg{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:14px;min-height:42px}
+.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.msg.ok{background:var(--good-soft);color:var(--good)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface-2);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.ctl{margin-bottom:14px}
+.ctl:last-child{margin-bottom:0}
+.ctl .row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px}
+.ctl .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btns.sm .btn{padding:6px 12px;font-size:13px}
+#val{width:92px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+#val:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+select{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.sub{font-size:12px;color:var(--muted);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:480px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.m{background:var(--surface-2);border-radius:10px;padding:10px;min-width:0}
+.m b{display:block;font-size:20px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.m span{font-size:12px;color:var(--muted)}
+.insight{padding:11px 13px;border-radius:10px;font-size:13.5px;background:var(--accent-soft)}
+.insight.warn{background:var(--warn-soft);color:var(--warn)}
+.log{margin:12px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.log li{padding:4px 0;border-top:1px dashed var(--line)}
+.log li:first-child{color:var(--ink)}
+.explain{font-size:14px}
+.explain p{margin:0 0 8px}
+.explain code{background:var(--surface-2);border-radius:5px;padding:1px 5px;font-size:12.5px}
+.cite{font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:0 5px;cursor:help}
+.tasks{margin:0;padding-left:18px;font-size:13.5px}
+.tasks li{margin-bottom:6px}
+.tasks input{accent-color:var(--good);margin-right:6px}
+.below{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+@media(max-width:900px){.below{grid-template-columns:1fr}}
+.stack>*+*{margin-top:16px}
+footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+footer ol{display:inline;padding:0;margin:0;list-style:none}
+footer li{display:inline}
+footer li+li:before{content:" · "}
+/* svg */
+#stage .nd circle,#stage .bx rect{fill:var(--surface);stroke:var(--muted);stroke-width:1.5;transition:fill .15s,stroke .15s}
+#stage text{fill:var(--ink);font:600 13px system-ui,sans-serif;text-anchor:middle;dominant-baseline:central}
+#stage .on circle,#stage .on rect{fill:var(--accent-soft);stroke:var(--accent)}
+#stage .cur circle,#stage .cur rect{fill:var(--accent);stroke:var(--accent)}
+#stage .cur text{fill:var(--surface)}
+#stage .ok circle,#stage .ok rect{fill:var(--good-soft);stroke:var(--good);stroke-width:2}
+#stage .bad circle,#stage .bad rect{fill:var(--bad-soft);stroke:var(--bad);stroke-width:2}
+#stage .fr circle{stroke:var(--accent);stroke-dasharray:4 3;stroke-width:2}
+#stage .edge{stroke:var(--line);stroke-width:2}
+#stage .edge.te{stroke:var(--accent);stroke-width:3.5}
+#stage .lbl{fill:var(--muted);font:500 11.5px system-ui,sans-serif}
+#stage .hot{fill:var(--accent-soft)}
+#stage .start circle{stroke:var(--ink);stroke-width:3}
+#stage .clickable{cursor:pointer}
+#stage.sm text{font-size:19px}
+#stage.sm .lbl{font-size:16px}
+</style>
+</head>
+<body>
+<a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin:14px 0 0 max(16px,env(safe-area-inset-left,0px));padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font:13px system-ui,sans-serif">← All projects</a>
+<div class="wrap">
+<header>
+  <div>
+    <small>DSA · Interactive model</small>
+    <h1>Data Structure <span>Playground</span></h1>
+    <p>Push, pop, insert, delete and search, and watch every step. Count how many steps each operation really takes, and see when a structure goes from fast to slow.</p>
+  </div>
+  <button class="btn" id="themeBtn">◐ Theme</button>
+</header>
+
+<div class="layout">
+  <section class="card">
+    <svg id="stage" viewBox="0 0 600 360" role="img" aria-label="Drawing of the current data structure"></svg>
+    <div class="msg" id="msg" aria-live="polite"></div>
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <h2>1 · Structure</h2>
+      <div class="ctl"><div class="seg" id="dsSeg">
+        <button data-v="stack" aria-pressed="false">Stack</button>
+        <button data-v="queue" aria-pressed="false">Queue</button>
+        <button data-v="bst" aria-pressed="true">BST</button>
+        <button data-v="heap" aria-pressed="false">Min-heap</button>
+        <button data-v="hash" aria-pressed="false">Hash table</button>
+        <button data-v="graph" aria-pressed="false">Graph</button>
+      </div></div>
+      <div class="ctl"><div class="row"><span>Animation speed</span><b id="spV"></b></div><input type="range" id="speed" min="1" max="5" step="1" value="3"></div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Operations</h2>
+      <div id="ops"></div>
+    </section>
+  </div>
+</div>
+
+<div class="below">
+  <section class="card">
+    <h2>3 · What did that cost?</h2>
+    <div class="metrics" id="metrics"></div>
+    <div class="insight" id="insight"></div>
+    <ul class="log" id="log"></ul>
+  </section>
+  <section class="card">
+    <h2>What's going on <span class="cite" title="Grounded in my DSA notebook">grounded</span></h2>
+    <div class="explain" id="explain"></div>
+    <h2 style="margin-top:14px">Try this</h2>
+    <ol class="tasks">
+      <li><label><input type="checkbox">BST: press <b>Insert 1–10 in order</b>. The height becomes 10, a "linked list". Then press <b>Insert 10 random</b> and compare.</label></li>
+      <li><label><input type="checkbox">BST: run <b>Inorder</b>. The keys come out sorted. Why?</label></li>
+      <li><label><input type="checkbox">Min-heap: press <b>Extract min</b> again and again. The numbers come out in sorted order. That's heap sort.</label></li>
+      <li><label><input type="checkbox">Hash table: switch to <b>Worst case</b> and insert 8 random keys. Watch one chain grow and the search steps rise.</label></li>
+      <li><label><input type="checkbox">Graph: run <b>BFS</b> and then <b>DFS</b> from the same start. Compare the visit orders.</label></li>
+    </ol>
+  </section>
+</div>
+<footer>Concepts from my DSA notebook: <ol id="srcFoot"></ol>. Nothing is sent anywhere; everything runs in your browser.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SRC=["Open Data Structures (Pat Morin)","MIT 6.006 lecture notes","Algorithms, Jeff Erickson","Tech Interview Handbook","Interview Cake Big-O cheat sheet","My DSA notes"];
+const cite=n=>`<span class="cite" title="${esc(SRC[n-1])}">[${n}]</span>`;
+$("#srcFoot").innerHTML=SRC.map((s,i)=>`<li>[${i+1}] ${esc(s)}</li>`).join("");
+
+/* theme */
+let theme=null;try{theme=localStorage.getItem("gai-theme")}catch(e){}
+function applyTheme(){document.documentElement.dataset.theme=theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+$("#themeBtn").onclick=()=>{theme=document.documentElement.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("gai-theme",theme)}catch(e){};applyTheme();};
+applyTheme();
+
+/* ---------- state ---------- */
+const S={ds:"bst",speed:3,busy:false,log:[],steps:null};
+let H={};
+const D={stack:[3,7,12],queue:[4,9,2],bst:null,heap:[5,12,8,20,15,10],heapOut:[],
+  hash:{m:7,fn:"good",b:[]},graph:null,run:null};
+let K=1,FS=13;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const delay=()=>[1000,650,420,240,90][S.speed-1];
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function say(t,kind){const m=$("#msg");m.innerHTML=t;m.className="msg"+(kind?" "+kind:"");}
+function record(op,steps){S.steps=steps;S.log.unshift(`${op} · ${steps} step${steps===1?"":"s"}`);S.log=S.log.slice(0,6);}
+function lock(on){document.querySelectorAll("#ops button,#ops input,#ops select,#dsSeg button").forEach(b=>b.disabled=on);}
+async function play(frames,done){
+  S.busy=true;lock(true);
+  for(const f of frames){H=f.h||{};if(f.msg)say(f.msg,f.kind);render();await sleep(delay());}
+  S.busy=false;lock(false);if(done)done();render();
+}
+function val(){const raw=$("#val")&&$("#val").value.trim(),v=parseInt(raw,10);
+  if(raw===""||isNaN(v)||v<0||v>999||String(v)!==raw.replace(/^0+(?=\d)/,"")){say("Type a whole number from 0 to 999 first.","warn");return null;}return v;}
+function nextVal(){const el=$("#val");if(el)el.value=rnd(1,99);}
+function cls(id){
+  if(H.cur===id)return"cur";if(H.bad&&H.bad.has(id))return"bad";if(H.ok&&H.ok.has(id))return"ok";
+  if(H.on&&H.on.has(id))return"on";if(H.front&&H.front.has(id))return"fr";return"";}
+const circ=(x,y,r,t,c,extra="")=>`<g class="nd ${c}" ${extra}><circle cx="${x}" cy="${y}" r="${r}"/><text x="${x}" y="${y}" style="font-size:${Math.min(FS,r*(String(t).length>2?.85:1.1)).toFixed(1)}px">${esc(t)}</text></g>`;
+const box=(x,y,w,h,t,c)=>`<g class="bx ${c}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7"/><text x="${x+w/2}" y="${y+h/2}" style="font-size:${Math.min(FS,h*.6,w/(Math.max(2,String(t).length)*.62)).toFixed(1)}px">${esc(t)}</text></g>`;
+const lbl=(x,y,t,anchor="middle")=>`<text class="lbl" x="${x}" y="${y}" style="text-anchor:${anchor}">${esc(t)}</text>`;
+const line=(x1,y1,x2,y2,c="")=>`<line class="edge ${c}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+const valInput=()=>`<input id="val" type="number" inputmode="numeric" min="0" max="999" value="${rnd(1,99)}" aria-label="Value">`;
+const log2=n=>Math.log2(n);
+
+/* ---------- STACK ---------- */
+const STACK={
+  ops:()=>`<div class="btns">${valInput()}<button class="btn primary" data-a="push">Push</button><button class="btn" data-a="pop">Pop</button><button class="btn" data-a="peek">Peek</button></div>
+    <div class="btns sm" style="margin-top:10px"><button class="btn" data-a="rand">Push 5 random</button><button class="btn" data-a="clear">Clear</button></div>`,
+  act:{
+    push(){const v=val();if(v==null)return;if(D.stack.length>=9)return say("The demo stack holds 9 items. Pop some first. (A real stack would grow.)","warn");
+      D.stack.push(v);H={ok:new Set([D.stack.length-1])};say(`Pushed <b>${v}</b> on top. Only the top was touched: 1 step.`,"ok");record(`push ${v}`,1);nextVal();},
+    pop(){if(!D.stack.length){H={};return say("The stack is empty, so there's nothing to pop. This is called <b>stack underflow</b>.","warn");}
+      const i=D.stack.length-1,v=D.stack[i];
+      play([{h:{bad:new Set([i])},msg:`Pop takes the <b>top</b> item, ${v}: last in, first out.`}],()=>{D.stack.pop();H={};say(`Popped <b>${v}</b>. 1 step.`,"ok");record(`pop → ${v}`,1);});},
+    peek(){if(!D.stack.length)return say("Empty stack: nothing to peek at.","warn");const i=D.stack.length-1;H={cur:i};say(`Top is <b>${D.stack[i]}</b>. Peek reads it without removing it: 1 step.`);record("peek",1);},
+    rand(){const k=Math.min(5,9-D.stack.length);if(!k)return say("Stack is full in this demo.","warn");for(let j=0;j<k;j++)D.stack.push(rnd(1,99));H={ok:new Set(D.stack.map((_,i)=>i).slice(-k))};say(`Pushed ${k} random values.`);record(`push ×${k}`,k);},
+    clear(){D.stack=[];H={};say("Stack cleared.");}
+  },
+  draw(){const a=D.stack,n=a.length,w=150,h=32,x=225;let s="";
+    s+=line(x-12,336,x+w+12,336)+lbl(x+w/2,352,"bottom");
+    if(!n)s+=lbl(300,180,"empty stack — push something");
+    a.forEach((v,i)=>{const y=330-(i+1)*(h+3);s+=box(x,y,w,h,v,cls(i));if(i===n-1)s+=lbl(x-16,y+h/2,"top →","end");});
+    return{svg:s};},
+  metrics:()=>[[D.stack.length,"items"],[D.stack.length?D.stack[D.stack.length-1]:"–","top"],[S.steps??"–","steps (last op)"],["O(1)","push / pop"]],
+  insight:()=>["","Push and pop only touch the <b>top</b>, so they take 1 step whether the stack holds 3 items or 3 million. That's O(1)."],
+  explain:()=>`<p>A <b>stack</b> is last-in, first-out (LIFO). Push adds on top, pop removes from the top, and both are O(1). ${cite(6)}</p>
+    <p>It's used for undo, matching brackets <code>([{}])</code>, function calls (the call stack) and depth-first search. ${cite(6)} ${cite(2)}</p>
+    <p>In code: Python <code>list.append()</code> / <code>list.pop()</code>, Java <code>ArrayDeque.push()</code> / <code>pop()</code>.</p>`
+};
+
+/* ---------- QUEUE ---------- */
+const QUEUE={
+  ops:()=>`<div class="btns">${valInput()}<button class="btn primary" data-a="enq">Enqueue</button><button class="btn" data-a="deq">Dequeue</button><button class="btn" data-a="peek">Peek</button></div>
+    <div class="btns sm" style="margin-top:10px"><button class="btn" data-a="rand">Enqueue 5 random</button><button class="btn" data-a="clear">Clear</button></div>`,
+  act:{
+    enq(){const v=val();if(v==null)return;if(D.queue.length>=9)return say("The demo queue holds 9 items. Dequeue some first.","warn");
+      D.queue.push(v);H={ok:new Set([D.queue.length-1])};say(`Enqueued <b>${v}</b> at the back: 1 step.`,"ok");record(`enqueue ${v}`,1);nextVal();},
+    deq(){if(!D.queue.length){H={};return say("The queue is empty: nothing to dequeue.","warn");}const v=D.queue[0];
+      play([{h:{bad:new Set([0])},msg:`Dequeue takes the <b>front</b> item, ${v}: first in, first out.`}],()=>{D.queue.shift();H={};say(`Dequeued <b>${v}</b>. 1 step.`,"ok");record(`dequeue → ${v}`,1);});},
+    peek(){if(!D.queue.length)return say("Empty queue: nothing to peek at.","warn");H={cur:0};say(`Front is <b>${D.queue[0]}</b>. 1 step.`);record("peek",1);},
+    rand(){const k=Math.min(5,9-D.queue.length);if(!k)return say("Queue is full in this demo.","warn");for(let j=0;j<k;j++)D.queue.push(rnd(1,99));H={ok:new Set(D.queue.map((_,i)=>i).slice(-k))};say(`Enqueued ${k} random values.`);record(`enqueue ×${k}`,k);},
+    clear(){D.queue=[];H={};say("Queue cleared.");}
+  },
+  draw(){const a=D.queue,n=a.length,w=54,h=50,g=6,x0=300-(n*(w+g)-g)/2,y=150;let s="";
+    if(!n)s+=lbl(300,175,"empty queue — enqueue something");
+    a.forEach((v,i)=>{const x=x0+i*(w+g);s+=box(x,y,w,h,v,cls(i));if(i===0)s+=lbl(x+w/2,y+h+20,"front");if(i===n-1)s+=lbl(x+w/2,y+h+(n===1?36:20),"back");});
+    if(n){s+=lbl(x0-14,y+h/2,"← dequeue","end")+lbl(x0+n*(w+g)+8,y+h/2,"← enqueue","start");}
+    return{svg:s};},
+  metrics:()=>[[D.queue.length,"items"],[D.queue.length?D.queue[0]:"–","front"],[S.steps??"–","steps (last op)"],["O(1)","enqueue / dequeue"]],
+  insight:()=>["","Items leave in the same order they arrived. Enqueue at the back and dequeue at the front are both O(1) with a linked list or a circular array."],
+  explain:()=>`<p>A <b>queue</b> is first-in, first-out (FIFO): enqueue at the back, dequeue at the front, both O(1). ${cite(6)}</p>
+    <p>Breadth-first search uses a queue to visit a graph level by level. ${cite(2)} Queues also model printers, task schedulers and buffers.</p>
+    <p>In code: Python <code>collections.deque</code> (<code>append</code> / <code>popleft</code>), Java <code>ArrayDeque.offer()</code> / <code>poll()</code>. Avoid <code>list.pop(0)</code> in Python: it is O(n). ${cite(1)}</p>`
+};
+
+/* ---------- BST ---------- */
+function bstHas(v){let n=D.bst;while(n){if(v===n.v)return true;n=v<n.v?n.l:n.r;}return false;}
+function bstIns(v){const nn={v,l:null,r:null};if(!D.bst){D.bst=nn;return;}let n=D.bst;for(;;){if(v<n.v){if(!n.l){n.l=nn;return;}n=n.l;}else{if(!n.r){n.r=nn;return;}n=n.r;}}}
+function bstDel(n,v){if(!n)return null;if(v<n.v)n.l=bstDel(n.l,v);else if(v>n.v)n.r=bstDel(n.r,v);else{if(!n.l)return n.r;if(!n.r)return n.l;let s=n.r;while(s.l)s=s.l;n.v=s.v;n.r=bstDel(n.r,s.v);}return n;}
+function bstPath(v){const p=[];let n=D.bst;while(n){p.push(n.v);if(v===n.v)break;n=v<n.v?n.l:n.r;}return p;}
+function bstInfo(){const pos={};let i=0,h=0;(function walk(n,d){if(!n)return;walk(n.l,d+1);pos[n.v]={i:i++,d};h=Math.max(h,d+1);walk(n.r,d+1);})(D.bst,0);return{pos,n:i,h};}
+function pathFrames(v,path){return path.map((p,k)=>({h:{on:new Set(path.slice(0,k)),cur:p},
+  msg:v===p?`Compare ${v} with ${p}: <b>match</b>.`:`Compare ${v} with ${p}: ${v} ${v<p?"&lt;":"&gt;"} ${p}, so go <b>${v<p?"left":"right"}</b>.`}));}
+function traverse(kind){const out=[];
+  if(kind==="level"){const q=D.bst?[D.bst]:[];while(q.length){const n=q.shift();out.push(n.v);if(n.l)q.push(n.l);if(n.r)q.push(n.r);}return out;}
+  (function w(n){if(!n)return;if(kind==="pre")out.push(n.v);w(n.l);if(kind==="in")out.push(n.v);w(n.r);if(kind==="post")out.push(n.v);})(D.bst);return out;}
+const TNAME={in:"Inorder (left, node, right)",pre:"Preorder (node, left, right)",post:"Postorder (left, right, node)",level:"Level order (row by row)"};
+const BST={
+  ops:()=>`<div class="btns">${valInput()}<button class="btn primary" data-a="ins">Insert</button><button class="btn" data-a="find">Search</button><button class="btn" data-a="del">Delete</button></div>
+    <div class="sub">Traversals</div><div class="btns sm"><button class="btn" data-a="in">Inorder</button><button class="btn" data-a="pre">Preorder</button><button class="btn" data-a="post">Postorder</button><button class="btn" data-a="level">Level order</button></div>
+    <div class="sub">Fill the tree</div><div class="btns sm"><button class="btn" data-a="sorted">Insert 1–10 in order</button><button class="btn" data-a="random">Insert 10 random</button><button class="btn" data-a="clear">Clear</button></div>`,
+  act:{
+    ins(){const v=val();if(v==null)return;if(bstInfo().n>=31)return say("This demo tree holds 31 nodes. Clear it or delete some.","warn");
+      const path=bstPath(v),dup=bstHas(v);
+      play(pathFrames(v,path),()=>{
+        if(dup){H={bad:new Set([v])};say(`<b>${v}</b> is already in the tree. A BST stores each key once.`,"warn");}
+        else{bstIns(v);H={on:new Set(path),ok:new Set([v])};say(`Inserted <b>${v}</b> after ${path.length} comparison${path.length===1?"":"s"}${path.length?"":" (it's the root)"}.`,"ok");nextVal();}
+        record(`insert ${v}`,Math.max(1,path.length));});},
+    find(){const v=val();if(v==null)return;const path=bstPath(v),found=bstHas(v);
+      play(pathFrames(v,path),()=>{
+        if(found){H={on:new Set(path),ok:new Set([v])};say(`Found <b>${v}</b> in ${path.length} comparison${path.length===1?"":"s"}. The tree's height is ${bstInfo().h}, so no search takes more than ${bstInfo().h}.`,"ok");}
+        else{H={on:new Set(path)};say(`<b>${v}</b> is not in the tree: reached an empty spot after ${path.length} comparison${path.length===1?"":"s"}.`,"warn");}
+        record(`search ${v}`,Math.max(1,path.length));});},
+    del(){const v=val();if(v==null)return;const path=bstPath(v);
+      if(!bstHas(v))return play(pathFrames(v,path),()=>{H={on:new Set(path)};say(`<b>${v}</b> isn't in the tree, so there's nothing to delete.`,"warn");record(`delete ${v}`,Math.max(1,path.length));});
+      let n=D.bst;while(n.v!==v)n=v<n.v?n.l:n.r;
+      const frames=pathFrames(v,path);let steps=path.length,note;
+      if(n.l&&n.r){let s=n.r;const sp=[];while(s){sp.push(s.v);s=s.l;}const succ=sp[sp.length-1];steps+=sp.length;
+        sp.forEach((p,k)=>frames.push({h:{bad:new Set([v]),on:new Set(sp.slice(0,k)),cur:p},msg:`${v} has two children. Find its <b>successor</b>, the smallest key in its right subtree: ${k===sp.length-1?`it's <b>${p}</b>.`:`go left from ${p}.`}`}));
+        note=`${v} had two children, so its successor <b>${succ}</b> moved into its place.`;
+        play(frames,()=>{D.bst=bstDel(D.bst,v);H={ok:new Set([succ])};say(`Deleted <b>${v}</b>. ${note}`,"ok");record(`delete ${v}`,steps);});}
+      else{note=n.l||n.r?`${v} had one child, which moved up into its place.`:`${v} was a leaf, so it was simply removed.`;
+        frames.push({h:{bad:new Set([v])},msg:note});
+        play(frames,()=>{D.bst=bstDel(D.bst,v);H={};say(`Deleted <b>${v}</b>. ${note}`,"ok");record(`delete ${v}`,steps);});}},
+    in(){BST.walk("in")},pre(){BST.walk("pre")},post(){BST.walk("post")},level(){BST.walk("level")},
+    sorted(){D.bst=null;for(let i=1;i<=10;i++)bstIns(i);H={};say("Inserted 1, 2, 3 … 10 <b>in sorted order</b>. Every key went right, so the tree is one long chain.","warn");record("insert 1–10 sorted",55);},
+    random(){D.bst=null;const s=new Set();while(s.size<10)s.add(rnd(1,99));[...s].forEach(bstIns);H={};say(`Inserted 10 random keys: ${[...s].join(", ")}.`);record("insert 10 random",10);},
+    clear(){D.bst=null;H={};say("Tree cleared. Insert a value to make a new root.");}
+  },
+  walk(kind){const order=traverse(kind);if(!order.length)return say("The tree is empty.","warn");
+    const frames=order.map((v,k)=>({h:{ok:new Set(order.slice(0,k)),cur:v},msg:`${TNAME[kind]}: ${order.slice(0,k+1).join(", ")}`}));
+    play(frames,()=>{H={ok:new Set(order)};const sortedNote=kind==="in"?" Inorder always gives the keys <b>in sorted order</b>: everything on the left is smaller, everything on the right is bigger.":kind==="level"?" Level order uses a queue, just like BFS.":"";
+      say(`${TNAME[kind]}: <b>${order.join(", ")}</b>.${sortedNote}`,"ok");record(`${kind}order traversal`,order.length);});},
+  draw(){const {pos,n,h}=bstInfo();if(!n)return{svg:lbl(300,180,"empty tree — insert a value")};
+    const W=600,r=Math.min((n>20?13:n>12?15:17)*K,.46*W/n),gap=h>1?Math.min(70*K,(330-2*r-20)/(h-1)):0,X=v=>(pos[v].i+.5)*W/n,Y=v=>24+r+pos[v].d*gap;let e="",s="";
+    (function w(nd){if(!nd)return;for(const c of [nd.l,nd.r])if(c)e+=line(X(nd.v),Y(nd.v),X(c.v),Y(c.v));w(nd.l);w(nd.r);})(D.bst);
+    for(const v in pos)s+=circ(X(+v),Y(+v),r,v,cls(+v));
+    return{svg:e+s};},
+  metrics(){const {n,h}=bstInfo();return[[n,"nodes"],[h,"height"],[S.steps??"–","steps (last op)"],[n?`O(h) = ${h}`:"O(h)","search cost"]];},
+  insight(){const {n,h}=bstInfo();if(n<4)return["","Add a few keys. The cost of search, insert and delete depends on the tree's <b>height</b>."];
+    const best=Math.ceil(log2(n+1));
+    if(h>=Math.max(best+3,n*.6))return["warn",`<b>Unbalanced:</b> height ${h} for ${n} nodes, but it could be ${best}. The tree has become a linked list, so search is O(n). Insert keys in random order, or use a self-balancing tree (AVL or red-black).`];
+    return["",`<b>Reasonably balanced:</b> height ${h} for ${n} nodes. The best possible is ⌈log₂(${n}+1)⌉ = ${best}, so a search takes at most ${h} comparisons instead of ${n}.`];},
+  explain:()=>`<p>A <b>binary search tree</b> keeps smaller keys in the left subtree and larger keys in the right one. Search, insert and delete each walk one path, so they cost <b>O(h)</b>, the tree's height. ${cite(1)}</p>
+    <p>Random inserts give a height near log n. Sorted inserts make a chain of height n, so every operation becomes O(n). Balanced trees such as AVL and red-black trees keep the height O(log n). ${cite(1)} ${cite(5)}</p>
+    <p>Deleting a node with two children replaces it with its <b>successor</b>, the smallest key in its right subtree. ${cite(2)}</p>`
+};
+
+/* ---------- MIN-HEAP ---------- */
+const hH=n=>n?Math.floor(log2(n)):0;
+const HEAP={
+  ops:()=>`<div class="btns">${valInput()}<button class="btn primary" data-a="ins">Insert</button><button class="btn" data-a="ext">Extract min</button><button class="btn" data-a="peek">Peek min</button></div>
+    <div class="btns sm" style="margin-top:10px"><button class="btn" data-a="rand">Insert 7 random</button><button class="btn" data-a="clear">Clear</button></div>`,
+  act:{
+    ins(){const v=val();if(v==null)return;if(D.heap.length>=31)return say("This demo heap holds 31 items.","warn");
+      const a=[...D.heap,v];let i=a.length-1,cmp=0,sw=0;const frames=[{h:{arr:[...a],ok:new Set([i])},msg:`Add <b>${v}</b> at the end of the array (index ${i}), the next free spot in the tree.`}];
+      while(i>0){const p=(i-1)>>1;cmp++;frames.push({h:{arr:[...a],cur:i,on:new Set([p])},msg:`Compare ${a[i]} with its parent ${a[p]} (index ${p} = ⌊(${i}−1)/2⌋).`});
+        if(a[i]<a[p]){[a[i],a[p]]=[a[p],a[i]];sw++;frames.push({h:{arr:[...a],cur:p,on:new Set([i])},msg:`${a[p]} &lt; ${a[i]}, so <b>swap up</b> (sift up).`});i=p;}else break;}
+      play(frames,()=>{D.heap=a;D.heapOut=[];H={ok:new Set([i])};say(`Inserted <b>${v}</b>: ${cmp} comparison${cmp===1?"":"s"}, ${sw} swap${sw===1?"":"s"}. Never more than the height, ${hH(a.length)}.`,"ok");record(`insert ${v}`,Math.max(1,cmp));nextVal();});},
+    ext(){if(!D.heap.length)return say("The heap is empty.","warn");
+      const a=[...D.heap],min=a[0];let cmp=0,sw=0;const frames=[{h:{arr:[...a],cur:0},msg:`The minimum is always at the root: <b>${min}</b>. Remove it.`}];
+      const last=a.pop();
+      if(a.length){a[0]=last;frames.push({h:{arr:[...a],cur:0},msg:`Move the last item, ${last}, to the root.`});let i=0;
+        for(;;){const l=2*i+1,r=l+1;if(l>=a.length)break;let c=l;cmp++;if(r<a.length){cmp++;if(a[r]<a[l])c=r;}
+          frames.push({h:{arr:[...a],cur:i,on:new Set([l,r].filter(x=>x<a.length))},msg:`Compare ${a[i]} with its children; the smaller child is ${a[c]}.`});
+          if(a[c]<a[i]){[a[c],a[i]]=[a[i],a[c]];sw++;frames.push({h:{arr:[...a],cur:c,on:new Set([i])},msg:`${a[i]} &lt; ${a[c]}, so <b>swap down</b> (sift down).`});i=c;}else break;}}
+      play(frames,()=>{D.heap=a;D.heapOut.push(min);H={};
+        say(`Removed <b>${min}</b> (${cmp} comparison${cmp===1?"":"s"}, ${sw} swap${sw===1?"":"s"}). Removed so far: <b>${D.heapOut.join(", ")}</b>${D.heapOut.length>2?", in sorted order.":"."}`,"ok");record(`extract-min → ${min}`,Math.max(1,cmp));});},
+    peek(){if(!D.heap.length)return say("The heap is empty.","warn");H={cur:0};say(`The minimum is <b>${D.heap[0]}</b>, always at index 0. 1 step.`);record("peek min",1);},
+    rand(){const k=Math.min(7,31-D.heap.length);if(!k)return say("The heap is full in this demo.","warn");
+      for(let j=0;j<k;j++){const a=D.heap;a.push(rnd(1,99));let i=a.length-1;while(i>0){const p=(i-1)>>1;if(a[i]<a[p]){[a[i],a[p]]=[a[p],a[i]];i=p;}else break;}}
+      D.heapOut=[];H={};say(`Inserted ${k} random values. Each one sifted up to its place.`);record(`insert ×${k}`,k);},
+    clear(){D.heap=[];D.heapOut=[];H={};say("Heap cleared.");}
+  },
+  draw(){const a=H.arr||D.heap,n=a.length;if(!n)return{svg:lbl(300,180,"empty heap — insert a value")};
+    const dmax=Math.floor(log2(n)),r=Math.min((n>15?13:16)*K,.44*600/2**dmax),gy=Math.min(54*K,70),P=i=>{const d=Math.floor(log2(i+1)),p=i-(2**d-1);return[(p+.5)*600/2**d,24+r+d*gy];};let e="",s="";
+    for(let i=1;i<n;i++){const[a1,b1]=P((i-1)>>1),[a2,b2]=P(i);e+=line(a1,b1,a2,b2);}
+    for(let i=0;i<n;i++){const[x,y]=P(i);s+=circ(x,y,r,a[i],cls(i));}
+    const bw=Math.min(40*K,580/n),x0=300-bw*n/2,y=Math.max(...a.map((_,i)=>P(i)[1]))+r+40;
+    s+=lbl(x0,y-12,"stored as an array (index below):","start");
+    for(let i=0;i<n;i++){s+=box(x0+i*bw,y,bw-2,28*Math.min(K,1.3),a[i],cls(i));if(n<=20||i%2===0)s+=lbl(x0+i*bw+bw/2,y+42,i);}
+    return{svg:e+s,h:y+28*Math.min(K,1.3)+30};},
+  metrics:()=>[[D.heap.length,"items"],[hH(D.heap.length),"height"],[S.steps??"–","steps (last op)"],["O(log n)","insert / extract"]],
+  insight:()=>{const n=D.heap.length;return n?["",`The minimum (<b>${D.heap[0]}</b>) is always at the root, so peek is O(1). With ${n} items the height is ⌊log₂ ${n}⌋ = ${hH(n)}, so insert and extract need at most ${hH(n)} swaps.`]:["","Insert some values to build a heap."];},
+  explain:()=>`<p>A <b>binary min-heap</b> is a complete binary tree where every parent is ≤ its children. It is stored in a plain array: the children of index i are at 2i+1 and 2i+2, its parent at ⌊(i−1)/2⌋. ${cite(1)}</p>
+    <p>Insert adds at the end and <b>sifts up</b>; extract-min moves the last item to the root and <b>sifts down</b>. Both are O(log n), and peeking at the minimum is O(1). ${cite(1)} ${cite(5)}</p>
+    <p>Heaps power priority queues, Dijkstra's shortest paths and "top k" interview problems. ${cite(2)} ${cite(4)} In code: Python <code>heapq</code>, Java <code>PriorityQueue</code>.</p>`
+};
+
+/* ---------- HASH TABLE ---------- */
+const hf=k=>D.hash.fn==="good"?k%D.hash.m:0;
+function hashKeys(){return D.hash.b.flat();}
+function rehash(keys){D.hash.b=Array.from({length:D.hash.m},()=>[]);keys.forEach(k=>D.hash.b[hf(k)].push(k));}
+function hashFrames(k){const b=hf(k),ch=D.hash.b[b],frames=[{h:{bucket:b},msg:D.hash.fn==="good"?`hash(${k}) = ${k} mod ${D.hash.m} = <b>${b}</b>. Go to bucket ${b}.`:`Worst-case hash: <b>every</b> key goes to bucket 0.`}];
+  let found=-1;for(let j=0;j<ch.length;j++){frames.push({h:{bucket:b,cur:`${b}:${j}`},msg:`Compare ${k} with ${ch[j]}${ch[j]===k?": <b>match</b>.":"."}`});if(ch[j]===k){found=j;break;}}
+  return{b,frames,found,steps:1+(found>=0?found+1:ch.length)};}
+const HASH={
+  ops:()=>`<div class="btns">${valInput()}<button class="btn primary" data-a="ins">Insert</button><button class="btn" data-a="find">Search</button><button class="btn" data-a="del">Delete</button></div>
+    <div class="ctl" style="margin-top:14px"><div class="row"><span>Buckets (m)</span><b id="mV">${D.hash.m}</b></div><input type="range" id="mR" min="3" max="13" step="1" value="${D.hash.m}"></div>
+    <div class="ctl"><div class="row"><span>Hash function</span></div><div class="seg" id="fnSeg"><button data-v="good" aria-pressed="${D.hash.fn==="good"}">Good: k mod m</button><button data-v="bad" aria-pressed="${D.hash.fn==="bad"}">Worst case: all collide</button></div></div>
+    <div class="btns sm"><button class="btn" data-a="rand">Insert 8 random</button><button class="btn" data-a="clear">Clear</button></div>`,
+  after(){$("#mR").oninput=e=>{if(S.busy)return;D.hash.m=+e.target.value;$("#mV").textContent=D.hash.m;const k=hashKeys();rehash(k);H={};say(`<b>Rehashed</b> ${k.length} key${k.length===1?"":"s"} into ${D.hash.m} buckets. Every key's bucket was recomputed.`);render();};
+    $("#fnSeg").onclick=e=>{const b=e.target.closest("button");if(!b||S.busy)return;D.hash.fn=b.dataset.v;$("#fnSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));rehash(hashKeys());H={};
+      say(D.hash.fn==="bad"?"Simulating the <b>worst case</b>: a hash function that sends every key to bucket 0.":"Back to a good hash: k mod m spreads keys across the buckets.");render();};},
+  act:{
+    ins(){const k=val();if(k==null)return;if(hashKeys().length>=30)return say("This demo table holds 30 keys.","warn");const r=hashFrames(k);
+      play(r.frames,()=>{if(r.found>=0){H={bad:new Set([`${r.b}:${r.found}`])};say(`<b>${k}</b> is already in the table.`,"warn");}
+        else{D.hash.b[r.b].push(k);H={bucket:r.b,ok:new Set([`${r.b}:${D.hash.b[r.b].length-1}`])};say(`Inserted <b>${k}</b> into bucket ${r.b} after ${r.steps} step${r.steps===1?"":"s"} (1 hash + ${r.steps-1} comparison${r.steps===2?"":"s"} to check it isn't there).`,"ok");nextVal();}
+        record(`insert ${k}`,r.steps);});},
+    find(){const k=val();if(k==null)return;const r=hashFrames(k);
+      play(r.frames,()=>{if(r.found>=0){H={bucket:r.b,ok:new Set([`${r.b}:${r.found}`])};say(`Found <b>${k}</b> in ${r.steps} steps, without looking at the other ${hashKeys().length-r.found-1} keys.`,"ok");}
+        else{H={bucket:r.b};say(`<b>${k}</b> isn't in the table. Only bucket ${r.b} was checked: ${r.steps} step${r.steps===1?"":"s"}.`,"warn");}record(`search ${k}`,r.steps);});},
+    del(){const k=val();if(k==null)return;const r=hashFrames(k);
+      play(r.frames,()=>{if(r.found>=0){D.hash.b[r.b].splice(r.found,1);H={bucket:r.b};say(`Deleted <b>${k}</b> from bucket ${r.b}.`,"ok");}else{H={bucket:r.b};say(`<b>${k}</b> isn't in the table.`,"warn");}record(`delete ${k}`,r.steps);});},
+    rand(){const have=new Set(hashKeys()),k=Math.min(8,30-have.size);if(!k)return say("The table is full in this demo.","warn");let c=0;while(c<k){const v=rnd(10,999);if(!have.has(v)){have.add(v);D.hash.b[hf(v)].push(v);c++;}}
+      H={};say(`Inserted ${k} random keys.`);record(`insert ×${k}`,k);},
+    clear(){rehash([]);H={};say("Table cleared.");}
+  },
+  draw(){const m=D.hash.m,b=D.hash.b,rowH=K>1?44:Math.min(44,330/m),bh=rowH-8,cw=50,longest=Math.max(0,...b.map(c=>c.length));
+    const W=Math.max(600,120+longest*(cw+12));let s="";
+    b.forEach((ch,i)=>{const y=14+i*rowH;
+      if(H.bucket===i)s+=`<rect class="hot" x="4" y="${y-3}" width="${W-8}" height="${rowH-2}" rx="8"/>`;
+      s+=lbl(26,y+bh/2,i);s+=`<g class="bx"><rect x="44" y="${y}" width="34" height="${bh}" rx="6"/></g>`;
+      if(!ch.length)s+=lbl(61,y+bh/2,"∅");
+      ch.forEach((k,j)=>{const x=96+j*(cw+12);s+=line(j?x-12:78,y+bh/2,x,y+bh/2)+box(x,y,cw,bh,k,cls(`${i}:${j}`));});});
+    return{svg:s,w:W,h:Math.max(200,20+m*rowH)};},
+  metrics(){const n=hashKeys().length,a=n/D.hash.m;return[[n,"keys"],[a.toFixed(2),"load factor α = n/m"],[S.steps??"–","steps (last op)"],[D.hash.fn==="good"?"O(1) avg":"O(n) worst","lookup"]];},
+  insight(){const n=hashKeys().length,a=n/D.hash.m,long=Math.max(0,...D.hash.b.map(c=>c.length));
+    if(D.hash.fn==="bad"&&n>2)return["warn",`<b>Worst case:</b> all ${n} keys are in one chain, so a search may compare against all ${n}. Lookup is now O(n), no better than a list.`];
+    if(a>1.5)return["warn",`<b>Load factor ${a.toFixed(2)} is high:</b> the longest chain has ${long} keys. Real hash tables grow (about double m) and rehash once α gets too big. Try more buckets.`];
+    return["",`α = ${a.toFixed(2)} and the longest chain has ${long} key${long===1?"":"s"}. With short chains a lookup takes about 1 + α steps, which is O(1) on average.`];},
+  explain:()=>`<p>A <b>hash table with chaining</b> computes a bucket with a hash function, here <code>k mod m</code>, and keeps a short list (chain) in each bucket. ${cite(1)}</p>
+    <p>If the hash spreads keys evenly and the <b>load factor</b> α = n/m stays small, insert, search and delete take O(1) expected time. ${cite(1)} If many keys <b>collide</b>, one chain gets long and the worst case is O(n). ${cite(5)}</p>
+    <p>That's why hash maps resize when they fill up. In code: Python <code>dict</code> / <code>set</code>, Java <code>HashMap</code> / <code>HashSet</code>. ${cite(4)}</p>`
+};
+
+/* ---------- GRAPH ---------- */
+const GP=[[80,70],[240,46],[400,62],[530,120],[120,230],[290,180],[450,250],[300,318]];
+const L=i=>"ABCDEFGH"[i];
+function setGraph(edges){const adj=GP.map(()=>[]);edges.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a);});adj.forEach(l=>l.sort((x,y)=>x-y));D.graph={edges,adj,start:D.graph?D.graph.start:0};D.run=null;}
+setGraph([[0,1],[0,4],[1,2],[1,5],[2,3],[2,6],[4,5],[5,7],[6,7],[3,6]]);
+function randomGraph(){const ord=[...Array(8).keys()].sort(()=>Math.random()-.5),E=new Set(),key=(a,b)=>a<b?a+"-"+b:b+"-"+a;
+  for(let i=1;i<8;i++){const a=ord[i];const near=ord.slice(0,i).sort((x,y)=>dist(a,x)-dist(a,y));E.add(key(a,near[Math.floor(Math.random()*Math.min(2,near.length))]));}
+  let tries=0;while(E.size<10&&tries++<60){const a=rnd(0,7),b=rnd(0,7);if(a!==b&&dist(a,b)<280)E.add(key(a,b));}
+  setGraph([...E].map(s=>s.split("-").map(Number)));}
+const dist=(a,b)=>Math.hypot(GP[a][0]-GP[b][0],GP[a][1]-GP[b][1]);
+const GRAPH={
+  ops:()=>`<div class="btns"><label style="font-size:13px;color:var(--muted)">Start <select id="start" aria-label="Start node">${GP.map((_,i)=>`<option value="${i}" ${i===D.graph.start?"selected":""}>${L(i)}</option>`).join("")}</select></label>
+      <button class="btn primary" data-a="bfs">Run BFS</button><button class="btn" data-a="dfs">Run DFS</button></div>
+    <p style="font-size:12.5px;color:var(--muted);margin:10px 0">Tip: tap a node in the drawing to make it the start.</p>
+    <div class="btns sm"><button class="btn" data-a="rand">New random graph</button><button class="btn" data-a="reset">Clear result</button></div>`,
+  after(){$("#start").onchange=e=>{D.graph.start=+e.target.value;D.run=null;H={};say(`Start node is now <b>${L(D.graph.start)}</b>.`);render();};},
+  act:{
+    bfs(){const g=D.graph,s=g.start,d={[s]:0},q=[s],order=[],tree=[],frames=[];let steps=0;
+      while(q.length){const u=q.shift();order.push(u);frames.push({h:{cur:u,ok:new Set(order),front:new Set(q),tree:[...tree],dist:{...d}},msg:`Dequeue <b>${L(u)}</b> and visit it. Queue: [${q.map(L).join(", ")}]`});
+        for(const w of g.adj[u]){steps++;if(!(w in d)){d[w]=d[u]+1;q.push(w);tree.push([u,w]);frames.push({h:{cur:u,ok:new Set(order),front:new Set(q),tree:[...tree],dist:{...d}},msg:`Discover <b>${L(w)}</b> at distance ${d[w]}; add it to the back of the queue. Queue: [${q.map(L).join(", ")}]`});}}}
+      play(frames,()=>{D.run={kind:"BFS",order,steps:steps+order.length};H={ok:new Set(order),tree,dist:d};
+        say(`BFS order: <b>${order.map(L).join(" → ")}</b>. The numbers are the <b>fewest edges</b> from ${L(s)}: BFS finds shortest paths in unweighted graphs.`,"ok");record(`BFS from ${L(s)}`,steps+order.length);});},
+    dfs(){const g=D.graph,s=g.start,st=[s],seen=new Set(),par={},order=[],tree=[],frames=[];let steps=0;
+      while(st.length){const u=st.pop();if(seen.has(u))continue;seen.add(u);order.push(u);if(u in par)tree.push([par[u],u]);
+        for(const w of [...g.adj[u]].reverse()){steps++;if(!seen.has(w)){par[w]=u;st.push(w);}}
+        frames.push({h:{cur:u,ok:new Set(order),front:new Set(st.filter(x=>!seen.has(x))),tree:[...tree]},msg:`Pop <b>${L(u)}</b> and visit it, then push its unvisited neighbours. Stack (top last): [${st.filter(x=>!seen.has(x)).map(L).join(", ")}]`});}
+      play(frames,()=>{D.run={kind:"DFS",order,steps:steps+order.length};H={ok:new Set(order),tree};
+        say(`DFS order: <b>${order.map(L).join(" → ")}</b>. DFS goes as deep as it can before backing up, so its paths are <b>not</b> always the shortest.`,"ok");record(`DFS from ${L(s)}`,steps+order.length);});},
+    rand(){randomGraph();H={};say("New random connected graph with 8 nodes.");},
+    reset(){D.run=null;H={};say("Cleared. Pick a start node and run BFS or DFS.");}
+  },
+  draw(){const g=D.graph,tree=H.tree||[],isT=(a,b)=>tree.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a));let e="",s="";
+    g.edges.forEach(([a,b])=>e+=line(GP[a][0],GP[a][1],GP[b][0],GP[b][1],isT(a,b)?"te":""));
+    GP.forEach(([x,y],i)=>{s+=circ(x,y,20*Math.min(K,1.35),L(i),cls(i)+(i===g.start?" start":"")+" clickable",`data-node="${i}"`);
+      if(H.dist&&i in H.dist)s+=lbl(x+22*K,y-20*K,"d="+H.dist[i],"start");});
+    return{svg:e+s};},
+  metrics:()=>[[`${GP.length} / ${D.graph.edges.length}`,"nodes / edges"],[D.run?D.run.order.length:"–","visited"],[S.steps??"–","steps (last op)"],["O(V + E)","BFS / DFS"]],
+  insight:()=>!D.run?["","Pick a start node, then run BFS or DFS. Both visit every node and check every edge once: O(V + E)."]
+    :D.run.kind==="BFS"?["",`<b>BFS</b> used a <b>queue</b> and visited nodes in rings of distance 0, 1, 2… from ${L(D.graph.start)}. Use it for shortest paths when every edge costs the same.`]
+    :["",`<b>DFS</b> used a <b>stack</b> and followed one path as deep as possible before backtracking. Use it for cycle detection, topological sort and counting connected parts (like "number of islands").`],
+  explain:()=>`<p><b>Breadth-first search</b> uses a queue to explore level by level and finds shortest paths in an unweighted graph. <b>Depth-first search</b> uses a stack (or recursion) to go deep first. Both run in <b>O(V + E)</b>. ${cite(2)}</p>
+    <p>The graph is stored as an <b>adjacency list</b>: each node keeps a list of its neighbours, which uses O(V + E) space. ${cite(1)}</p>
+    <p>Interview pattern: a grid is a graph too, so "flood fill", "rotting oranges" and "number of islands" are BFS/DFS problems. ${cite(4)}</p>`
+};
+
+/* ---------- wiring ---------- */
+const DS={stack:STACK,queue:QUEUE,bst:BST,heap:HEAP,hash:HASH,graph:GRAPH};
+function render(){const st=$("#stage");K=st.clientWidth&&st.clientWidth<520?1.45:1;FS=K>1?19:13;st.classList.toggle("sm",K>1);const d=DS[S.ds],r=d.draw();st.setAttribute("viewBox",`0 0 ${r.w||600} ${r.h||360}`);st.innerHTML=r.svg;
+  const mt=d.metrics();$("#metrics").innerHTML=mt.map(([v,l])=>`<div class="m"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("");
+  const [k,t]=d.insight();const ins=$("#insight");ins.className="insight"+(k?" "+k:"");ins.innerHTML=t;
+  $("#log").innerHTML=S.log.length?S.log.map(x=>`<li>${esc(x)}</li>`).join(""):`<li style="color:var(--muted)">Your operations and their step counts appear here.</li>`;}
+function choose(ds){S.ds=ds;H={};S.steps=null;S.log=[];const d=DS[ds];
+  $("#dsSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===ds));
+  $("#ops").innerHTML=d.ops();if(d.after)d.after();$("#explain").innerHTML=d.explain();
+  const intro={stack:"A stack: try Push and Pop.",queue:"A queue: try Enqueue and Dequeue.",bst:"A binary search tree. Type a number and press Insert, Search or Delete.",heap:"A min-heap, drawn as a tree and as the array it really lives in.",hash:"A hash table with 7 buckets and chaining.",graph:"An undirected graph with 8 nodes. Run BFS or DFS."}[ds];
+  say(intro);render();try{localStorage.setItem("gai-dsp",ds)}catch(e){}}
+$("#dsSeg").onclick=e=>{const b=e.target.closest("button");if(!b||S.busy)return;choose(b.dataset.v);};
+$("#ops").addEventListener("click",e=>{const b=e.target.closest("button[data-a]");if(!b||S.busy)return;DS[S.ds].act[b.dataset.a]();if(!S.busy)render();});
+$("#ops").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="val"){e.preventDefault();const p=$("#ops .btn.primary");if(p&&!S.busy)p.click();}});
+$("#stage").addEventListener("click",e=>{const g=e.target.closest("[data-node]");if(!g||S.busy||S.ds!=="graph")return;D.graph.start=+g.dataset.node;D.run=null;H={};const sel=$("#start");if(sel)sel.value=D.graph.start;say(`Start node is now <b>${L(D.graph.start)}</b>. Run BFS or DFS.`);render();});
+const spEl=$("#speed"),spUpd=()=>{S.speed=+spEl.value;$("#spV").textContent=["very slow","slow","medium","fast","very fast"][S.speed-1];};spEl.oninput=spUpd;spUpd();
+
+[50,30,70,20,40,60,80].forEach(bstIns);rehash([15,22,8,41,30]);
+addEventListener("resize",()=>{if(!S.busy)render();});
+let first="bst";try{const v=localStorage.getItem("gai-dsp");if(v&&DS[v])first=v;}catch(e){}
+choose(first);
+</script>
+</body>
+</html>
